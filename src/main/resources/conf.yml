@@ -1,0 +1,38 @@
+DEFAULTS: &defaults
+  workload.rates.limit: 500000
+  workload.burst.limit: 800000
+  workload.duration: !env $(workload.duration:30)
+  workload.threads: !env $(workload.threads:32)
+  workload.class: com.github.rbuck.dash.sample.Sample
+  db.name: test
+  db.schema: test
+  db.user: dba
+  db.password: dba
+  db.type: nuodb
+  db.pool.type: hikaricp
+  db.transaction.autocommit: true
+  db.transaction.readonly: false
+  # n.b. BoneCP does not use the TRANSACTION_ prefix for isolation level naming!
+  db.transaction.isolation: TRANSACTION_READ_COMMITTED
+  metrics.service.reporters: [csv,console,elasticsearch]
+  metrics.service.elasticsearch.hosts: ['localhost:9200']
+
+SINGLE: &single
+  <<: *defaults
+  workload.mix: 100
+  workload.tag: !env $(workload.tag:create)
+
+# traditional style...
+CREATE:
+  <<: *single
+  workload.tag: create
+
+# or flow style...
+DELETE: {<<: *single, workload.tag: delete}
+
+# etc...
+
+MIX_1:
+  <<: *defaults
+  workload.tag: [create,delete]
+  workload.mix: [50,50]
