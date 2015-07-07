@@ -1,5 +1,6 @@
 package com.nuodb.field.common;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -11,7 +12,11 @@ public class Resources {
 
     public static Properties loadResource(Class<?> clazz, String path, Properties properties) throws IOException {
         try (InputStream in = clazz.getResourceAsStream(path)) {
-            properties.load(in);
+            if (in != null) {
+                properties.load(in);
+            } else {
+                throw new FileNotFoundException("Classpath resource not found: " + path);
+            }
         }
         return properties;
     }

@@ -12,10 +12,7 @@ import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -209,29 +206,29 @@ public class BusinessServices extends AbstractService {
 
         // configuration...
 
-        java.util.Properties properties = new java.util.Properties();
+        Properties properties = new Properties();
         loadResource(BusinessServices.class, "application.properties", properties);
         properties.putAll(getProperties());
 
         // normalize properties...
 
-        final String dbHost = Properties.getStringProperty(properties, "database.host", "localhost");
-        final String dbName = Properties.getStringProperty(properties, "database.name", "cloud");
-        final int dbPort = Properties.getIntegerProperty(properties, "database.port", 48004);
-        final String dbSchema = Properties.getStringProperty(properties, "database.schema", "cloud");
+        final String dbHost = PropertiesUtil.getStringProperty(properties, "database.host", "localhost");
+        final String dbName = PropertiesUtil.getStringProperty(properties, "database.name", "cloud");
+        final int dbPort = PropertiesUtil.getIntegerProperty(properties, "database.port", 48004);
+        final String dbSchema = PropertiesUtil.getStringProperty(properties, "database.schema", "cloud");
         final String dbUrlString = "jdbc:com.nuodb://" + dbHost + ":" + dbPort + "/" + dbName + "?schema=" + dbSchema;
 
         properties.put("url", dbUrlString);
-        properties.put("user", "" + Properties.getStringProperty(properties, "db.user", "dba"));
-        properties.put("password", "" + Properties.getStringProperty(properties, "db.password", "dba"));
-        properties.put("testOnReturn", "" + Properties.getBooleanProperty(properties, "db.connections.test_on_return", true));
-        properties.put("validationQuery", "" + Properties.getStringProperty(properties, "db.connections.validation_query_string", "SELECT 1 FROM DUAL"));
-        properties.put("isolation", "" + Properties.getStringProperty(properties, "db.connections.isolation", "READ_COMMITTED"));
-        properties.put("defaultAutoCommit", "" + Properties.getBooleanProperty(properties, "db.connections.default_auto_commit", false));
+        properties.put("user", "" + PropertiesUtil.getStringProperty(properties, "db.user", "dba"));
+        properties.put("password", "" + PropertiesUtil.getStringProperty(properties, "db.password", "dba"));
+        properties.put("testOnReturn", "" + PropertiesUtil.getBooleanProperty(properties, "db.connections.test_on_return", true));
+        properties.put("validationQuery", "" + PropertiesUtil.getStringProperty(properties, "db.connections.validation_query_string", "SELECT 1 FROM DUAL"));
+        properties.put("isolation", "" + PropertiesUtil.getStringProperty(properties, "db.connections.isolation", "READ_COMMITTED"));
+        properties.put("defaultAutoCommit", "" + PropertiesUtil.getBooleanProperty(properties, "db.connections.default_auto_commit", false));
         properties.put("NuoDB_Bug_defaultAutoCommit", "defaultAutoCommit");
-        properties.put("maxAge", "" + Properties.getIntegerProperty(properties, "db.connections.maxage", 30000));
-        properties.put("workload.mix", Properties.getStringProperty(properties, "workload.mix", "[5,15,30,10,40]"));
-        properties.put("workload.tag", Properties.getStringProperty(properties, "workload.tag", "[OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]"));
+        properties.put("maxAge", "" + PropertiesUtil.getIntegerProperty(properties, "db.connections.maxage", 30000));
+        properties.put("workload.mix", PropertiesUtil.getStringProperty(properties, "workload.mix", "[5,15,30,10,40]"));
+        properties.put("workload.tag", PropertiesUtil.getStringProperty(properties, "workload.tag", "[OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]"));
 
         // operational state...
 
@@ -264,7 +261,7 @@ public class BusinessServices extends AbstractService {
                 .convertDurationsTo(TimeUnit.MILLISECONDS).build();
         consoleReporter.start(5, TimeUnit.SECONDS);
 
-        String logDirString = Properties.getStringProperty(getProperties(), "test.log.dir", null);
+        String logDirString = PropertiesUtil.getStringProperty(getProperties(), "test.log.dir", null);
         if (logDirString != null) {
             File logDir = new File(logDirString);
             if (logDir.exists()) {

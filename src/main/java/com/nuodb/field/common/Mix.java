@@ -6,8 +6,8 @@ import java.util.Properties;
 import java.util.Random;
 
 import static com.nuodb.field.common.Preconditions.checkArgument;
-import static com.nuodb.field.common.Properties.getIntegerArrayProperty;
-import static com.nuodb.field.common.Properties.getStringArrayProperty;
+import static com.nuodb.field.common.PropertiesUtil.getIntegerArrayProperty;
+import static com.nuodb.field.common.PropertiesUtil.getStringArrayProperty;
 
 /**
  * Prescribes a workload mix and identifies the next operation type to perform.

@@ -11,7 +11,7 @@ import static com.nuodb.field.common.TypeValidator.*;
 /**
  * Provides property helper methods.
  */
-public class Properties {
+public class PropertiesUtil {
 
     /**
      * Get a string property from the application properties file.
