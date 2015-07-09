@@ -49,22 +49,22 @@ Several properties are available to tailor the execution of the demo:
 
 |      Property     | Description                      | Default              |
 |:----------------  |---------------------------------  |:---------------------|
-| test.class        | package-qualified class name of the test to run | com.nuodb.field.services.cloud.Namespace |
+| test.class        | package-qualified class name of the test to run | com.nuodb.dash.services.cloud.Namespace |
 | test.mix          | comma separated list of mix integer percentages that must add up to 100 |  |
 | test.tag          | comma separated list of each mix name, names that correspond to the annotated workload names in the test suite |  |
 | test.threads      | the concurrency level            | 4 * num_cores    |
-| test.skip.db.init | whether or not to skip the database preload | false |
-| db.name           | the database name                | cloud       |
-| db.host           | the database host                | localhost  |
-| db.port           | the database port                | 48004      |
-| db.schema         | the database schema              | cloud       |
-| db.user           | the database user                | dba        |
-| db.password       | the database password            | dba        |
-| db.connections.maxage    | the maximum connection age in ms | 30000      |
-| db.connections.default_auto_commit    | whether or not to automatically commit each statement | false      |
-| db.connections.validation_query_string    | the validation query to execute when a connection is retrieved | SELECT 1 FROM DUAL |
-| db.connections.test_on_return    | whether or not to test a connection on retrieval | true  |
-| db.connections.isolation    | connection transaction isolation level | READ_COMMITTED  |
+| test.skip.dash.db.init | whether or not to skip the database preload | false |
+| dash.db.name           | the database name                | cloud       |
+| dash.db.host           | the database host                | localhost  |
+| dash.db.port           | the database port                | 48004      |
+| dash.db.schema         | the database schema              | cloud       |
+| dash.db.user           | the database user                | dba        |
+| dash.db.password       | the database password            | dba        |
+| dash.db.connections.maxage    | the maximum connection age in ms | 30000      |
+| dash.db.connections.default_auto_commit    | whether or not to automatically commit each statement | false      |
+| dash.db.connections.validation_query_string    | the validation query to execute when a connection is retrieved | SELECT 1 FROM DUAL |
+| dash.db.connections.test_on_return    | whether or not to test a connection on retrieval | true  |
+| dash.db.connections.isolation    | connection transaction isolation level | READ_COMMITTED  |
 
 ## Things to Do
 

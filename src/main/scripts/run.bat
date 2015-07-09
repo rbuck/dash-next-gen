@@ -93,8 +93,8 @@ echo =========================================================================
 echo .
 
 "%JAVA%" %JAVA_OPTS% ^
-    "-Dapplication.home.dir=file:%DASH_HOME%" ^
-    "-Dapplication.conf.dir=file:%DASH_CONF_DIR%" ^
+    "-Ddash.application.home.dir=file:%DASH_HOME%" ^
+    "-Ddash.application.conf.dir=file:%DASH_CONF_DIR%" ^
     "-Dlog.dir=file:%DASH_LOG_DIR%" ^
     "-Dlogback.configurationFile=file:%DASH_CONF_DIR%/logback.xml" ^
     com.nuodb.field.Main ^

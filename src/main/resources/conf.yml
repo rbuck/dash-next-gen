@@ -1,38 +1,39 @@
 DEFAULTS: &defaults
-  workload.rates.limit: 500000
-  workload.burst.limit: 800000
-  workload.duration: !env $(workload.duration:30)
-  workload.threads: !env $(workload.threads:32)
-  workload.class: com.github.rbuck.dash.sample.Sample
-  db.name: test
-  db.schema: test
-  db.user: dba
-  db.password: dba
-  db.type: nuodb
-  db.pool.type: hikaricp
-  db.transaction.autocommit: true
-  db.transaction.readonly: false
+  dash.driver.rates.limit: 500000
+  dash.driver.burst.limit: 800000
+  dash.driver.duration: !env $(dash.workload.duration:30)
+  dash.driver.threads: !env $(dash.workload.threads:32)
+  dash.driver.class: com.nuodb.dash.services.cloud.BusinessServices
+  dash.db.host: localhost
+  dash.db.name: cloud
+  dash.db.schema: test
+  dash.db.user: dba
+  dash.db.password: dba
+  dash.db.type: nuodb
+  dash.db.pool.type: hikaricp
+  dash.db.transaction.autocommit: true
+  dash.db.transaction.readonly: false
   # n.b. BoneCP does not use the TRANSACTION_ prefix for isolation level naming!
-  db.transaction.isolation: TRANSACTION_READ_COMMITTED
-  metrics.service.reporters: [csv,console,elasticsearch]
-  metrics.service.elasticsearch.hosts: ['localhost:9200']
+  dash.db.transaction.isolation: TRANSACTION_READ_COMMITTED
+  dash.metrics.service.reporters: [csv,console,elasticsearch]
+  dash.metrics.service.elasticsearch.hosts: ['localhost:9200']
 
 SINGLE: &single
   <<: *defaults
-  workload.mix: 100
-  workload.tag: !env $(workload.tag:create)
+  dash.workload.mix: 100
+  dash.workload.tag: !env $(dash.workload.tag:create)
 
 # traditional style...
 CREATE:
   <<: *single
-  workload.tag: create
+  dash.workload.tag: create
 
 # or flow style...
-DELETE: {<<: *single, workload.tag: delete}
+DELETE: {<<: *single, dash.workload.tag: delete}
 
 # etc...
 
 MIX_1:
   <<: *defaults
-  workload.tag: [create,delete]
-  workload.mix: [50,50]
+  dash.workload.tag: [create,delete]
+  dash.workload.mix: [50,50]

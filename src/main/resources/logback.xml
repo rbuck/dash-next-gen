@@ -2,7 +2,7 @@
 <configuration>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${log.dir}/dash.log</file>
+        <file>${dash.log.dir}/dash.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>dash-%d{yyyy-MM-dd}.%i.log.zip</fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
@@ -20,15 +20,23 @@
         </encoder>
     </appender>
 
-    <logger name="com.nuodb.field" level="WARN" additivity="false">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-
-    <logger name="com.nuodb.field" level="INFO" additivity="false">
+    <logger name="com.zaxxer.hikari" level="INFO" additivity="false">
         <appender-ref ref="FILE"/>
     </logger>
 
-    <root level="DEBUG">
+    <logger name="org.springframework" level="WARN" additivity="false">
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <logger name="com.nuodb.dash" level="WARN" additivity="false">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="com.nuodb.dash" level="INFO" additivity="false">
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <root level="INFO">
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
     </root>

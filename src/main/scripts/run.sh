@@ -45,9 +45,6 @@ PRGDIR=`dirname "${PRG}"`
 # Only set APPLICATION_CONF_DIR if not already set
 [ -z "${APPLICATION_CONF_DIR}" ] && APPLICATION_CONF_DIR=${APPLICATION_HOME_DIR}/conf
 
-# Only set APPLICATION_CONF_FILE if not already set
-[ -z "${APPLICATION_CONF_FILE}" ] && APPLICATION_CONF_FILE=${APPLICATION_CONF_DIR}/application.properties
-
 # Only set APPLICATION_LOGGING_CONF_FILE if not already set
 [ -z "${APPLICATION_LOGGING_CONF_FILE}" ] && APPLICATION_LOGGING_CONF_FILE=${APPLICATION_CONF_DIR}/logback.xml
 
@@ -137,23 +134,23 @@ while true; do
     if [ "x${LAUNCH_DASH_IN_BACKGROUND}" = "x" ]; then
         # Execute the JVM in the foreground
         eval "${JAVA}" ${JAVA_OPTS} \
-            -Dapplication.home.dir=${APPLICATION_HOME_DIR} \
-            -Dapplication.conf.dir=${APPLICATION_CONF_DIR} \
-            -Dlog.dir=${APPLICATION_LOG_DIR} \
+            -Ddash.application.home.dir=${APPLICATION_HOME_DIR} \
+            -Ddash.application.conf.dir=${APPLICATION_CONF_DIR} \
+            -Ddash.log.dir=${APPLICATION_LOG_DIR} \
             -Dlogback.configurationFile=file://${APPLICATION_LOGGING_CONF_FILE} \
-            -classpath "${CLASSPATH}" com.nuodb.field.Main "$SERVER_OPTS"
+            -classpath "${CLASSPATH}" com.nuodb.dash.Main "$SERVER_OPTS"
 
         APPLICATION_STATUS=$?
         # to redirect use this: > /var/tmp/github-demos.log 2>&1
     else
         # Execute the JVM in the background
         eval "${JAVA}" ${JAVA_OPTS} \
-            \"-Dapplication.home.dir=${APPLICATION_HOME_DIR}\" \
-            \"-Dapplication.conf.dir=${APPLICATION_CONF_DIR}\" \
-            \"-Dlog.dir=${APPLICATION_LOG_DIR}\" \
+            \"-Ddash.application.home.dir=${APPLICATION_HOME_DIR}\" \
+            \"-Ddash.application.conf.dir=${APPLICATION_CONF_DIR}\" \
+            \"-Ddash.log.dir=${APPLICATION_LOG_DIR}\" \
             \"-Dlogback.configurationFile=file://${APPLICATION_LOGGING_CONF_FILE}\" \
             -classpath "${CLASSPATH}" \
-            com.nuodb.field.Main \
+            com.nuodb.dash.Main \
             "$SERVER_OPTS" "&"
 
         APPLICATION_PID=$!
