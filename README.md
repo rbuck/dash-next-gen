@@ -158,3 +158,48 @@ You can also declare non-single tests, such as the mix defined in MIX_1.
 ## Dependencies
 
 None, entirely self-contained.
+
+## Execution
+
+### Command Line Interface
+
+The command line accepts the following options:
+
+|        Option        | Description                      | Default              |
+| :-------------------- |:--------------------------------| ---------------------|
+| -h, --help           | show this help message and exit |  |
+| -c CONF, --conf CONF | the config file containing the test specification to run | ../conf/conf.yml |
+| -t TEST, --test TEST | the name of the test to run   |             |
+| -v, --version        | print the version number           |                    |
+
+### Running the Application
+
+First off, verify your configuration in conf.yml, and noting the test names.
+
+The preferred way to run the application is to run it using the run.sh script.
+Here is an example of running a 50/50 test mix for this/that operations:
+
+    $ ./run.sh -t MIX_1
+    
+    Name        Count       Rate        Min      Max      Mean     Std Dev  Median   75%      95%      98%      99%      99.9%
+    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    this        18005596    2793639     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    this        40948025    3578840     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    this        63710613    3874956     0.00     0.01     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    this        85940803    4008354     0.00     0.01     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    this        108056113   4086774     0.00     0.01     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    this        127769973   4063944     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
+    
+    Time: 30.929
+    
+    OK (1 test)
+
+The Count column is the total number of calls to the test case performed.
+The Rate is measured in TPS. The remaining columns are all measured in
+milliseconds. The right five columns are the quantiles. The middle three
+are measured over a rolling window of time.
