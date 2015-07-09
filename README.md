@@ -49,11 +49,11 @@ Several properties are available to tailor the execution of the demo:
 
 |      Property     | Description                      | Default              |
 |:----------------  |---------------------------------  |:---------------------|
-| test.class        | package-qualified class name of the test to run | com.nuodb.dash.services.cloud.Namespace |
-| test.mix          | comma separated list of mix integer percentages that must add up to 100 |  |
-| test.tag          | comma separated list of each mix name, names that correspond to the annotated workload names in the test suite |  |
-| test.threads      | the concurrency level            | 4 * num_cores    |
-| test.skip.dash.db.init | whether or not to skip the database preload | false |
+| dash.driver.class        | package-qualified class name of the test to run | com.github.rbuck.dash.services.cloud.BusinessServices |
+| dash.driver.threads      | the concurrency level            | 4 * num_cores    |
+| dash.workload.mix          | comma separated list of mix integer percentages that must add up to 100 |  |
+| dash.workload.tag          | comma separated list of each mix name, names that correspond to the annotated workload names in the test suite |  |
+| dash.test.skip.dash.db.init | whether or not to skip the database preload | false |
 | dash.db.name           | the database name                | cloud       |
 | dash.db.host           | the database host                | localhost  |
 | dash.db.port           | the database port                | 48004      |
@@ -65,10 +65,6 @@ Several properties are available to tailor the execution of the demo:
 | dash.db.connections.validation_query_string    | the validation query to execute when a connection is retrieved | SELECT 1 FROM DUAL |
 | dash.db.connections.test_on_return    | whether or not to test a connection on retrieval | true  |
 | dash.db.connections.isolation    | connection transaction isolation level | READ_COMMITTED  |
-
-## Things to Do
-
-Add HTAP workload.
 
 ## Data Model and Processing
 

@@ -138,7 +138,7 @@ while true; do
             -Ddash.application.conf.dir=${APPLICATION_CONF_DIR} \
             -Ddash.log.dir=${APPLICATION_LOG_DIR} \
             -Dlogback.configurationFile=file://${APPLICATION_LOGGING_CONF_FILE} \
-            -classpath "${CLASSPATH}" com.nuodb.dash.Main "$SERVER_OPTS"
+            -classpath "${CLASSPATH}" com.github.rbuck.dash.Main "$SERVER_OPTS"
 
         APPLICATION_STATUS=$?
         # to redirect use this: > /var/tmp/github-demos.log 2>&1
@@ -150,7 +150,7 @@ while true; do
             \"-Ddash.log.dir=${APPLICATION_LOG_DIR}\" \
             \"-Dlogback.configurationFile=file://${APPLICATION_LOGGING_CONF_FILE}\" \
             -classpath "${CLASSPATH}" \
-            com.nuodb.dash.Main \
+            com.github.rbuck.dash.Main \
             "$SERVER_OPTS" "&"
 
         APPLICATION_PID=$!

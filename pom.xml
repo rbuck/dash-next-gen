@@ -121,7 +121,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.nuodb.dash.Main</mainClass>
+                            <mainClass>com.github.rbuck.dash.Main</mainClass>
                         </manifest>
                     </archive>
                     <excludes>

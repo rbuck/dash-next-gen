@@ -1,9 +1,9 @@
 DEFAULTS: &defaults
   dash.driver.rates.limit: 500000
   dash.driver.burst.limit: 800000
-  dash.driver.duration: !env $(dash.workload.duration:30)
-  dash.driver.threads: !env $(dash.workload.threads:32)
-  dash.driver.class: com.nuodb.dash.services.cloud.BusinessServices
+  dash.driver.duration: !env $(dash.driver.duration:30)
+  dash.driver.threads: !env $(dash.driver.threads:32)
+  dash.driver.class: com.github.rbuck.dash.services.cloud.BusinessServices
   dash.db.host: localhost
   dash.db.name: cloud
   dash.db.schema: test

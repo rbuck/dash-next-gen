@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+    <context:property-placeholder location="classpath:com/github/rbuck/dash/services/spring/bonecp.properties" ignore-unresolvable="true"/>
+
+    <bean id="dataSource" class="com.jolbox.bonecp.BoneCPDataSource" destroy-method="close">
+        <property name="driverClass" value="${dash.db.jdbc.driver}"/>
+        <property name="jdbcUrl" value="${dash.db.jdbc.url}"/>
+        <property name="username" value="${dash.db.user}"/>
+        <property name="password" value="${dash.db.password}"/>
+        <property name="defaultAutoCommit" value="${dash.db.transaction.autocommit:true}"/>
+        <property name="defaultTransactionIsolation" value="${dash.db.transaction.isolation:READ_COMMITTED}"/>
+        <property name="defaultReadOnly" value="${dash.db.transaction.readonly:false}"/>
+        <property name="connectionTestStatement" value="${dash.db.connection.test.string}"/>
+        <property name="minConnectionsPerPartition" value="1"/>
+        <property name="maxConnectionsPerPartition" value="32"/>
+        <property name="partitionCount" value="${partitionCount:5}"/>
+        <property name="acquireIncrement" value="${acquireIncrement:4}"/>
+        <property name="deregisterDriverOnClose" value="true"/>
+        <property name="statementsCacheSize" value="100"/>
+        <property name="idleMaxAgeInMinutes" value="240"/>
+        <property name="maxConnectionAgeInSeconds" value="${maxConnectionAgeInSeconds:120}"/>
+        <property name="resetConnectionOnClose" value="${resetConnectionOnClose:true}"/>
+        <property name="logStatementsEnabled" value="${logStatementsEnabled:false}"/>
+    </bean>
+
+</beans>

@@ -28,11 +28,11 @@
         <appender-ref ref="FILE"/>
     </logger>
 
-    <logger name="com.nuodb.dash" level="WARN" additivity="false">
+    <logger name="com.github.rbuck.dash" level="WARN" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="com.nuodb.dash" level="INFO" additivity="false">
+    <logger name="com.github.rbuck.dash" level="INFO" additivity="false">
         <appender-ref ref="FILE"/>
     </logger>
 
