@@ -23,6 +23,7 @@
         <bonecp.version>0.8.0.RELEASE</bonecp.version>
         <argparse4j.version>0.6.0</argparse4j.version>
         <hsqldb.version>2.3.3</hsqldb.version>
+        <springframework.version>4.1.7.RELEASE</springframework.version>
 
     </properties>
 
@@ -90,17 +91,45 @@
             <artifactId>hsqldb</artifactId>
             <version>${hsqldb.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>4.1.2.RELEASE</version>
-        </dependency>
         <dependency>
             <groupId>com.jolbox</groupId>
             <artifactId>bonecp</artifactId>
             <version>${bonecp.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${springframework.version}</version>
+        </dependency>
+
+        <!-- TODO...
+        aopalliance-1.0.jar
+        commons-logging-1.1.3.jar
+        guava-18.0.jar
+        javassist-3.18.2-GA.jar
+        java-retry...
+        -->
+
     </dependencies>
 
     <build>

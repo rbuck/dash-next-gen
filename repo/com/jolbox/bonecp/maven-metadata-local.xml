@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.jolbox</groupId>
+  <artifactId>bonecp</artifactId>
+  <versioning>
+    <release>0.8.0.RELEASE</release>
+    <versions>
+      <version>0.8.0.RELEASE</version>
+    </versions>
+    <lastUpdated>20150709220044</lastUpdated>
+  </versioning>
+</metadata>
