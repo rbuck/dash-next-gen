@@ -1,10 +1,15 @@
 package com.github.rbuck.dash.common;
 
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.primitives.Ints;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
-import static com.github.rbuck.dash.common.Joiner.join;
-import static com.github.rbuck.dash.common.Preconditions.checkArgument;
+import static com.github.rbuck.dash.common.TypeValidator.*;
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Provides property helper methods.
@@ -18,7 +23,7 @@ public class PropertiesHelper {
      * @param defaultValue the default value for the property
      * @return the parsed property
      */
-    public static String getStringProperty(java.util.Properties properties, String property, String defaultValue) {
+    public static String getStringProperty(Properties properties, String property, String defaultValue) {
         return properties.getProperty(property, defaultValue);
     }
 
@@ -30,9 +35,9 @@ public class PropertiesHelper {
      * @param defaultValue the default value for the property
      * @return the parsed property
      */
-    public static int getIntegerProperty(java.util.Properties properties, String property, int defaultValue) {
+    public static int getIntegerProperty(Properties properties, String property, int defaultValue) {
         final String candidate = properties.getProperty(property, Integer.toString(defaultValue));
-        checkArgument(TypeValidator.isInteger(candidate), "The " + property + " property (" +
+        checkArgument(isInteger(candidate), "The " + property + " property (" +
                 candidate + ") is not an integer; please fix your property declaration.");
         return Integer.parseInt(candidate);
     }
@@ -45,9 +50,9 @@ public class PropertiesHelper {
      * @param defaultValue the default value for the property
      * @return the parsed property
      */
-    public static long getLongProperty(java.util.Properties properties, String property, long defaultValue) {
+    public static long getLongProperty(Properties properties, String property, long defaultValue) {
         final String candidate = properties.getProperty(property, Long.toString(defaultValue));
-        checkArgument(TypeValidator.isLong(candidate), "The " + property + " property (" +
+        checkArgument(isLong(candidate), "The " + property + " property (" +
                 candidate + ") is not an integer; please fix your property declaration.");
         return Long.parseLong(candidate);
     }
@@ -60,9 +65,9 @@ public class PropertiesHelper {
      * @param defaultValue the default value for the property
      * @return the parsed property
      */
-    public static double getDoubleProperty(java.util.Properties properties, String property, double defaultValue) {
+    public static double getDoubleProperty(Properties properties, String property, double defaultValue) {
         final String candidate = properties.getProperty(property, Double.toString(defaultValue));
-        checkArgument(TypeValidator.isDouble(candidate), "The " + property + " property (" +
+        checkArgument(isDouble(candidate), "The " + property + " property (" +
                 candidate + ") is not a double; please fix your property declaration.");
         return Double.parseDouble(candidate);
     }
@@ -75,9 +80,9 @@ public class PropertiesHelper {
      * @param defaultValue the default value for the property
      * @return the parsed property
      */
-    public static boolean getBooleanProperty(java.util.Properties properties, String property, boolean defaultValue) {
+    public static boolean getBooleanProperty(Properties properties, String property, boolean defaultValue) {
         final String candidate = properties.getProperty(property, Boolean.toString(defaultValue));
-        checkArgument(TypeValidator.isBoolean(candidate), "The " + property + " property (" +
+        checkArgument(isBoolean(candidate), "The " + property + " property (" +
                 candidate + ") is not a boolean; please fix your property declaration.");
         return Boolean.parseBoolean(candidate);
     }
@@ -91,19 +96,19 @@ public class PropertiesHelper {
      * @param defaultValue the default value for the property
      * @return the parsed property
      */
-    public static int[] getIntegerArrayProperty(java.util.Properties properties, String property, int[] defaultValue) {
+    public static int[] getIntegerArrayProperty(Properties properties, String property, int[] defaultValue) {
         List<Integer> ints = new ArrayList<>();
-        String candidate = properties.getProperty(property, "[" + Joiner.join(",", defaultValue) + "]");
+        String candidate = properties.getProperty(property, "[" + Ints.join(",", defaultValue) + "]");
         if (candidate.startsWith("[") && candidate.endsWith("]")) {
             candidate = candidate.substring(1, candidate.length() - 1);
         }
-        for (String token : candidate.split(",")) {
+        for (String token : Splitter.on(',').split(candidate)) {
             token = token.trim();
-            checkArgument(TypeValidator.isInteger(token), "The " + property + " property (" +
+            checkArgument(isInteger(token), "The " + property + " property (" +
                     token + ") is not an integer; please fix your property declaration.");
             ints.add(Integer.valueOf(token));
         }
-        return Arrays.toIntArray(ints);
+        return Ints.toArray(ints);
     }
 
     /**
@@ -115,9 +120,9 @@ public class PropertiesHelper {
      * @param defaultValue the default value for the property
      * @return the parsed property
      */
-    public static String[] getStringArrayProperty(java.util.Properties properties, String property, String[] defaultValue) {
+    public static String[] getStringArrayProperty(Properties properties, String property, String[] defaultValue) {
         List<String> strings = new ArrayList<>();
-        String candidate = properties.getProperty(property, "[" + Joiner.join(",", defaultValue) + "]");
+        String candidate = properties.getProperty(property, "[" + Joiner.on(",").join(defaultValue) + "]");
         if (candidate.startsWith("[") && candidate.endsWith("]")) {
             candidate = candidate.substring(1, candidate.length() - 1);
         }
@@ -127,4 +132,5 @@ public class PropertiesHelper {
         String[] empty = {};
         return strings.toArray(empty);
     }
+
 }
