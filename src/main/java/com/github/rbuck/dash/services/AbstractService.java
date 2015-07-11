@@ -6,6 +6,7 @@ import com.github.rbuck.dash.common.PropertiesHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.System.getProperties;
 
@@ -26,7 +27,7 @@ public abstract class AbstractService implements Service {
     private Thread[] threads;
     private CountDownLatch threadLatch;
 
-    private volatile Status status;
+    private AtomicReference<Status> status = new AtomicReference<>(Status.DESTROYED);
 
     // P R O P E R T I E S
 
@@ -46,41 +47,11 @@ public abstract class AbstractService implements Service {
      */
     @Override
     public void create() throws Exception {
-        System.out.println("[" + now() + "] created");
-
-        threadLatch = new CountDownLatch(getThreadCount());
-
-        // thread creation...
-        Context context = createContext();
-        final Limiter limiter = createLimiter();
-        threads = new Thread[getThreadCount()];
-        for (int i = 0; i < getThreadCount(); i++) {
-            final Context localContext = context;
-            threads[i] = new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        while (isExecutable() && !isInterrupted()) {
-                            int tokenCount = getTokenCount(localContext, limiter);
-                            if (tokenCount > 0) {
-                                limiter.consume(tokenCount); // number of events...
-                                while (tokenCount-- > 0) {
-                                    execute(localContext); // represents one event
-                                }
-                            }
-                        }
-                    } catch (Error e) {
-                        AbstractService.this.stop();
-                        throw e;
-                    } finally {
-                        threadLatch.countDown();
-                    }
-                }
-            };
-            context = createContext();
+        if (status.compareAndSet(Status.DESTROYED, Status.CREATED)) {
+            System.out.println("[" + now() + "] created");
+            threadLatch = new CountDownLatch(getThreadCount());
+            threads = new Thread[getThreadCount()];
         }
-
-        status = Status.CREATED;
     }
 
     /**
@@ -90,31 +61,67 @@ public abstract class AbstractService implements Service {
      */
     @Override
     public void start() throws Exception {
-        System.out.println("[" + now() + "] started");
-        for (int i = 0; i < getThreadCount(); i++) {
-            threads[i].start();
+        if (status.compareAndSet(Status.CREATED, Status.STARTED)) {
+            System.out.println("[" + now() + "] started");
+
+            Context context = createContext();
+            final Limiter limiter = createLimiter();
+            for (int i = 0; i < getThreadCount(); i++) {
+                final Context localContext = context;
+                threads[i] = new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            while (isExecutable() && !isInterrupted()) {
+                                int tokenCount = getTokenCount(localContext, limiter);
+                                if (tokenCount > 0) {
+                                    limiter.consume(tokenCount); // number of events...
+                                    while (tokenCount-- > 0) {
+                                        execute(localContext); // represents one event
+                                    }
+                                }
+                            }
+                        } catch (Error e) {
+                            panic(e);
+                        } finally {
+                            threadLatch.countDown();
+                        }
+                    }
+                };
+                threads[i].start();
+                context = createContext();
+            }
         }
-        status = Status.STARTED;
+    }
+
+    void panic(Error e) {
+        stop();
+        throw e;
     }
 
     @Override
     public void stop() {
-        System.out.println("[" + now() + "] stopped");
-        for (int i = 0; i < getThreadCount(); i++) {
-            threads[i].interrupt();
+        if (status.compareAndSet(Status.STARTED, Status.STOPPED)) {
+            System.out.println("[" + now() + "] stopped");
+            for (int i = 0; i < getThreadCount(); i++) {
+                threads[i].interrupt();
+                //threads[i].join();
+                threads[i] = null;
+            }
         }
-        status = Status.STOPPED;
     }
 
     @Override
     public void destroy() {
-        System.out.println("[" + now() + "] destroyed");
-        try {
-            threadLatch.await();
-        } catch (InterruptedException e) {
-            Thread.interrupted();
+        stop();
+        if (status.compareAndSet(Status.STOPPED, Status.DESTROYED)) {
+            System.out.println("[" + now() + "] destroyed");
+            try {
+                threadLatch.await();
+            } catch (InterruptedException e) {
+                Thread.interrupted();
+            }
         }
-        status = Status.DESTROYED;
     }
 
     // S E R V I C E   M E T H O D S   A N D   H O O K S
@@ -162,6 +169,6 @@ public abstract class AbstractService implements Service {
     }
 
     protected boolean isExecutable() {
-        return status.ordinal() < Status.STOPPED.ordinal();
+        return status.get().ordinal() < Status.STOPPED.ordinal();
     }
 }

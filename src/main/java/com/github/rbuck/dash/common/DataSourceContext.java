@@ -1,5 +1,6 @@
 package com.github.rbuck.dash.common;
 
+import com.github.rbuck.retry.SqlTransactionContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -9,14 +10,16 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Hashtable;
 
 /**
  * Responsible for bootstrapping the whole Spring auto-wiring of data sources.
  */
-public class DataSourceContext implements AutoCloseable {
+public class DataSourceContext implements AutoCloseable, SqlTransactionContext {
 
-    public static final String DS_CONTEXT_NAME = "java:comp/env/jdbc/dashDataSource";
+    public static final String DS_CONTEXT_NAME = "java:comp/env/jdbc/DashDS";
 
     private final ConfigurableApplicationContext context;
 
@@ -51,7 +54,8 @@ public class DataSourceContext implements AutoCloseable {
         context.close();
     }
 
-    public DataSource getDataSource() {
-        return dataSource;
+    @Override
+    public Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
     }
 }

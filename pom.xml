@@ -129,6 +129,11 @@
         javassist-3.18.2-GA.jar
         java-retry...
         -->
+        <dependency>
+            <groupId>com.github.rbuck</groupId>
+            <artifactId>java-retry</artifactId>
+            <version>1.2</version>
+        </dependency>
 
     </dependencies>
 

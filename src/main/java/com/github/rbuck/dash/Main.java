@@ -1,8 +1,8 @@
 package com.github.rbuck.dash;
 
+import com.github.rbuck.dash.common.Exceptions;
 import com.github.rbuck.dash.common.YamlEnv;
 import com.github.rbuck.dash.services.Container;
-import com.github.rbuck.dash.common.Exceptions;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import static com.github.rbuck.dash.common.Exceptions.toStringAllCauses;
 import static java.lang.System.getProperty;
 
 /**

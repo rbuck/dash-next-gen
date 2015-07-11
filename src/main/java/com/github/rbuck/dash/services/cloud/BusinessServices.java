@@ -7,8 +7,10 @@ import com.github.rbuck.dash.common.*;
 import com.github.rbuck.dash.common.metrics.TimerConsoleReporter;
 import com.github.rbuck.dash.services.AbstractService;
 import com.github.rbuck.dash.services.Context;
+import com.github.rbuck.retry.FixedInterval;
+import com.github.rbuck.retry.SqlCallable;
+import com.github.rbuck.retry.SqlRetryPolicy;
 
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.sql.*;
@@ -26,24 +28,18 @@ import static java.lang.System.getProperties;
  */
 public class BusinessServices extends AbstractService {
 
-    private final DataSourceContext context;
+    private volatile TimerConsoleReporter consoleReporter;
+    private volatile CsvReporter csvReporter;
 
+    private SqlRetryPolicy<Boolean> retryPolicy;
     private MetricRegistry metricRegistry;
     private HashMap<String, Timer> meters;
-    private TimerConsoleReporter consoleReporter;
-    private CsvReporter csvReporter;
     private Random random;
 
     private Dialect dialect;
-    private DataSource dataSource;
     private Mix mix;
 
     public BusinessServices() {
-        context = new DataSourceContext();
-    }
-
-    public interface SqlCallable<V> {
-        V call(Connection connection) throws SQLException;
     }
 
     class BusinessContext implements Context {
@@ -213,26 +209,6 @@ public class BusinessServices extends AbstractService {
         Resources.loadResource(BusinessServices.class, "application.properties", properties);
         properties.putAll(getProperties());
 
-        // normalize properties...
-
-        final String dbHost = PropertiesHelper.getStringProperty(properties, "dash.database.host", "localhost");
-        final String dbName = PropertiesHelper.getStringProperty(properties, "dash.database.name", "cloud");
-        final int dbPort = PropertiesHelper.getIntegerProperty(properties, "dash.database.port", 48004);
-        final String dbSchema = PropertiesHelper.getStringProperty(properties, "dash.database.schema", "cloud");
-        final String dbUrlString = "jdbc:com.nuodb://" + dbHost + ":" + dbPort + "/" + dbName + "?schema=" + dbSchema;
-
-        properties.put("url", dbUrlString);
-        properties.put("user", "" + PropertiesHelper.getStringProperty(properties, "dash.db.user", "dba"));
-        properties.put("password", "" + PropertiesHelper.getStringProperty(properties, "dash.db.password", "dba"));
-        properties.put("testOnReturn", "" + PropertiesHelper.getBooleanProperty(properties, "dash.db.connections.test_on_return", true));
-        properties.put("validationQuery", "" + PropertiesHelper.getStringProperty(properties, "dash.db.connections.validation_query_string", "SELECT 1 FROM DUAL"));
-        properties.put("isolation", "" + PropertiesHelper.getStringProperty(properties, "dash.db.connections.isolation", "READ_COMMITTED"));
-        properties.put("defaultAutoCommit", "" + PropertiesHelper.getBooleanProperty(properties, "dash.db.connections.default_auto_commit", false));
-        properties.put("NuoDB_Bug_defaultAutoCommit", "defaultAutoCommit");
-        properties.put("maxAge", "" + PropertiesHelper.getIntegerProperty(properties, "dash.db.connections.maxage", 30000));
-        properties.put("dash.workload.mix", PropertiesHelper.getStringProperty(properties, "dash.workload.mix", "[5,15,30,10,40]"));
-        properties.put("dash.workload.tag", PropertiesHelper.getStringProperty(properties, "dash.workload.tag", "[OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]"));
-
         // operational state...
 
         random = new Random(31);
@@ -245,7 +221,9 @@ public class BusinessServices extends AbstractService {
             throw new IllegalArgumentException("Invalid dialect.");
         }
 
-        dataSource = new com.nuodb.jdbc.DataSource(properties);
+        retryPolicy = new SqlRetryPolicy<>(
+                new FixedInterval(1, 100),
+                new DataSourceContext());
 
         loadDataModel();
 
@@ -258,6 +236,39 @@ public class BusinessServices extends AbstractService {
         for (Mix.Type type : mix) {
             meters.put(type.getTag(), metricRegistry.timer(type.getTag()));
         }
+    }
+
+    private void loadDataModel() {
+        String sqlFile = dialect.getName() + "-dialect-install.sql";
+        try {
+            StringBuilder builder = Resources.loadResource(BusinessServices.class, sqlFile, new StringBuilder());
+            SqlScriptSplitter splitter = new SqlScriptSplitter();
+            final List<String> statements = splitter.splitStatements(builder.toString());
+            try {
+                retryPolicy.action(
+                        new SqlCallable<Boolean>() {
+                            @Override
+                            public Boolean call(Connection connection) throws SQLException {
+                                for (String sql : statements) {
+                                    try (Statement statement = connection.createStatement()) {
+                                        statement.execute(sql);
+                                    }
+                                }
+                                return true;
+                            }
+                        }
+                );
+            } catch (Exception e) {
+                throw new Error("Failed to setup cloud dash.database.", e);
+            }
+        } catch (IOException e) {
+            throw new Error("Failed to find " + sqlFile + " on classpath.", e);
+        }
+    }
+
+    @Override
+    public void start() throws Exception {
+        super.start();
 
         consoleReporter = TimerConsoleReporter.forRegistry(metricRegistry)
                 .convertRatesTo(TimeUnit.SECONDS)
@@ -276,33 +287,6 @@ public class BusinessServices extends AbstractService {
                 csvReporter.start(5, TimeUnit.SECONDS);
             }
         }
-
-    }
-
-    private void loadDataModel() {
-        String sqlFile = dialect.getName() + "-dialect-install.sql";
-        try {
-            StringBuilder builder = Resources.loadResource(BusinessServices.class, sqlFile, new StringBuilder());
-            SqlScriptSplitter splitter = new SqlScriptSplitter();
-            List<String> statements = splitter.splitStatements(builder.toString());
-            try (Connection connection = dataSource.getConnection()) {
-                for (String sql : statements) {
-                    try (Statement statement = connection.createStatement()) {
-                        statement.execute(sql);
-                    }
-                }
-                connection.commit();
-            } catch (SQLException e) {
-                throw new Error("Failed to setup cloud dash.database.", e);
-            }
-        } catch (IOException e) {
-            throw new Error("Failed to find " + sqlFile + " on classpath.", e);
-        }
-    }
-
-    @Override
-    public void start() throws Exception {
-        super.start();
     }
 
     @Override
@@ -310,12 +294,16 @@ public class BusinessServices extends AbstractService {
         try {
             if (csvReporter != null) {
                 csvReporter.close();
+                csvReporter = null;
             }
         } catch (Exception e) {
             // ignore
         }
         try {
-            consoleReporter.close();
+            if (consoleReporter != null) {
+                consoleReporter.close();
+                consoleReporter = null;
+            }
         } catch (Exception e) {
             // ignore
         }
@@ -337,9 +325,9 @@ public class BusinessServices extends AbstractService {
         try (Timer.Context ignore = timer.time()) {
             switch (type.getTag()) {
                 case "OLTP_C1": {
-                    retryCode(new SqlCallable() {
+                    retryPolicy.action(new SqlCallable<Boolean>() {
                         @Override
-                        public Object call(Connection connection) throws SQLException {
+                        public Boolean call(Connection connection) throws SQLException {
                             createAccount(businessContext, connection);
                             return true;
                         }
@@ -347,9 +335,9 @@ public class BusinessServices extends AbstractService {
                 }
                 break;
                 case "OLTP_C2": {
-                    retryCode(new SqlCallable() {
+                    retryPolicy.action(new SqlCallable<Boolean>() {
                         @Override
-                        public Object call(Connection connection) throws SQLException {
+                        public Boolean call(Connection connection) throws SQLException {
                             createContainer(businessContext, connection);
                             return true;
                         }
@@ -357,9 +345,9 @@ public class BusinessServices extends AbstractService {
                 }
                 break;
                 case "OLTP_C3": {
-                    retryCode(new SqlCallable() {
+                    retryPolicy.action(new SqlCallable<Boolean>() {
                         @Override
-                        public Object call(Connection connection) throws SQLException {
+                        public Boolean call(Connection connection) throws SQLException {
                             createObject(businessContext, connection);
                             return true;
                         }
@@ -367,24 +355,31 @@ public class BusinessServices extends AbstractService {
                 }
                 break;
                 case "OLTP_R2": {
-                    retryCode(new SqlCallable() {
+                    retryPolicy.action(new SqlCallable<Boolean>() {
                         @Override
-                        public Object call(Connection connection) throws SQLException {
+                        public Boolean call(Connection connection) throws SQLException {
                             listContainers(businessContext, connection);
                             return true;
                         }
                     });
                 }
+                break;
                 case "OLTP_R3": {
-                    retryCode(new SqlCallable() {
+                    retryPolicy.action(new SqlCallable<Boolean>() {
                         @Override
-                        public Object call(Connection connection) throws SQLException {
+                        public Boolean call(Connection connection) throws SQLException {
                             listObjects(businessContext, connection);
                             return true;
                         }
                     });
                 }
+                break;
+                default: {
+                    throw new Error("Unknown tag: " + type.getTag());
+                }
             }
+        } catch (Exception e) {
+            warn(e);
         }
     }
 
@@ -395,166 +390,11 @@ public class BusinessServices extends AbstractService {
 
     // U T I L I T I E S
 
-    // ########################################################################
-    // RETRY
-    // ########################################################################
-
-    /**
-     * Best Practice:
-     * <p/>
-     * Implements retry semantics, correctly determines if an exception is
-     * transient (may be retried) or is non-transient (cannot be retried).
-     * By implementing retry user transactions are never lost nor errors
-     * bubble up to users.
-     *
-     * @param callable the code block to execute
-     */
-    private void retryCode(SqlCallable callable) {
-        Exception re;
-        int retries = 10;
-        do {
-            try (Connection connection = context.getDataSource().getConnection()) {
-                try {
-                    callable.call(connection);
-                    connection.commit();
-                    return;
-                } catch (SQLException se) { // failed transactions...
-                    if (!isSqlStateConnectionException(se)) {
-                        try {
-                            connection.rollback();
-                        } catch (SQLException ignored) {
-                        }
-                    }
-                    throw se;
-                }
-            } catch (Exception e) { // failed getting connections...
-                re = e;
-                if (Thread.currentThread().isInterrupted() || isInterruptTransitively(e)) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-                if (!isTransient(e)) {
-                    throw new Error(re);
-                }
-                warn(re);
-            }
-            sleepDelay(retries);
-        } while (--retries > 0);
-    }
-
     private void warn(Exception re) {
         System.err.println(Exceptions.toStringAllCauses(re));
     }
 
     protected int getThreadCount() {
         return super.getThreadCount();
-    }
-
-    // ########################################################################
-    // EXPONENTIAL BACKOFF
-    // ########################################################################
-
-    private static final long DEFAULT_MIN_BACKOFF = TimeUnit.MILLISECONDS.convert(1, TimeUnit.SECONDS);
-    private static final long DEFAULT_MAX_BACKOFF = TimeUnit.MILLISECONDS.convert(30, TimeUnit.SECONDS);
-    private static final long DEFAULT_SLOT_TIME = TimeUnit.MILLISECONDS.convert(2, TimeUnit.SECONDS);
-
-    /**
-     * Best Practice:
-     * <p/>
-     * Implements one possible strategy during retry, that is to perform random
-     * binary exponential backoff between attempts.
-     */
-    private long getRetryDelay(int retryCount) {
-        final int MAX_CONTENTION_PERIODS = 10;
-        return retryCount == 0 ? 0 : Math.min(DEFAULT_MIN_BACKOFF +
-                random.nextInt(2 << Math.min(retryCount, MAX_CONTENTION_PERIODS - 1)) *
-                        DEFAULT_SLOT_TIME, DEFAULT_MAX_BACKOFF);
-    }
-
-    /**
-     * Best Practice:
-     * <p/>
-     * Sleep between retry attempts.
-     */
-    private void sleepDelay(int retryCount) {
-        try {
-            Thread.sleep(getRetryDelay(retryCount));
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    // ########################################################################
-    // TRANSIENT EXCEPTION DETECTION
-    // ########################################################################
-
-    /**
-     * Determines if the SQL exception is a connection exception
-     *
-     * @param se the exception
-     * @return true if it is a code 08nnn, otherwise false
-     */
-    private static boolean isSqlStateConnectionException(SQLException se) {
-        String sqlState = se.getSQLState();
-        return sqlState != null && sqlState.startsWith("08");
-    }
-
-    private boolean isInterruptTransitively(Throwable e) {
-        do {
-            if (e instanceof InterruptedException) {
-                return true;
-            }
-            e = e.getCause();
-        } while (e != null);
-        return false;
-    }
-
-    /**
-     * Determines if the SQL exception a duplicate value in unique index.
-     *
-     * @param se the exception
-     * @return true if it is a code 23505, otherwise false
-     */
-    private static boolean isSqlStateDuplicateValueInUniqueIndex(SQLException se) {
-        String sqlState = se.getSQLState();
-        return sqlState != null && (sqlState.equals("23505") || se.getMessage().contains("duplicate value in unique index"));
-    }
-
-    /**
-     * Determines if the SQL exception is a rollback exception
-     *
-     * @param se the exception
-     * @return true if it is a code 40nnn, otherwise false
-     */
-    private static boolean isSqlStateRollbackException(SQLException se) {
-        String sqlState = se.getSQLState();
-        return sqlState != null && sqlState.startsWith("40");
-    }
-
-    /**
-     * Best Practice:
-     * <p/>
-     * Determine whether or not exception related activities are retriable.
-     *
-     * @param e the exception
-     * @return true if the activity may be retried
-     */
-    private static boolean isTransient(Exception e) {
-        if (e instanceof SQLTransientException || e instanceof SQLRecoverableException) {
-            return true;
-        }
-        if (e instanceof SQLNonTransientException) {
-            return false;
-        }
-        if (e instanceof SQLException) {
-            SQLException se = (SQLException) e;
-            if (isSqlStateConnectionException(se) || isSqlStateRollbackException(se)) {
-                return true;
-            }
-            if (isSqlStateDuplicateValueInUniqueIndex(se)) { // we treat dupes as transient
-                return true;
-            }
-        }
-        return false;
     }
 }

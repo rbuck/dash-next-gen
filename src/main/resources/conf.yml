@@ -6,7 +6,7 @@ DEFAULTS: &defaults
   dash.driver.class: com.github.rbuck.dash.services.cloud.BusinessServices
   dash.db.host: localhost
   dash.db.name: cloud
-  dash.db.schema: test
+  dash.db.schema: cloud
   dash.db.user: dba
   dash.db.password: dba
   dash.db.type: nuodb
@@ -35,5 +35,5 @@ DELETE: {<<: *single, dash.workload.tag: delete}
 
 MIX_1:
   <<: *defaults
-  dash.workload.tag: [create,delete]
-  dash.workload.mix: [50,50]
+  dash.workload.tag: [OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]
+  dash.workload.mix: [10,20,30,20,20]
