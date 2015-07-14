@@ -8,7 +8,7 @@ concurrently using specified percentages of each. The latter point here is a
 significant differentiator for this framework that distinguishes if from other
 performance test frameworks.
 
-## Build
+## Building / Packaging
 
 Simply use Maven 3.x:
 
