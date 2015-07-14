@@ -33,6 +33,7 @@ public class SqlScript {
 
         char delimiter = DEFAULT_DELIMITER;
         boolean in_skip = false;
+        boolean in_set_delimiter = false;
         boolean in_single_line_comment = false;
         StringBuilder buffer = new StringBuilder();
         int length = input.length();
@@ -40,7 +41,7 @@ public class SqlScript {
             // handle printable tokens
             int q = scan(input, p, length, L_PRINTABLE, H_PRINTABLE);
             if (q > p) {
-                if (at(input, p, q, '-') && at(input, p, q + 1, '-')) {
+                if (is_single_line_comment(input, p, q)) {
                     in_single_line_comment = true;
                     in_skip = true;
                     p = q;
@@ -52,13 +53,28 @@ public class SqlScript {
                         // surrounded by two terms. split in such
                         // scenarios.
                         int d = seek(token, delimiter);
-                        if (d > 0) {
+                        if (d >= 0) {
+                            // this does not append the trailing delimiter
+                            // as they are unnecessary
                             buffer.append(token.substring(0, d));
                             statements.add(buffer.toString());
                             buffer.setLength(0);
                             q = p + d + 1;
                         } else {
-                            buffer.append(token).append(" ");
+                            buffer.append(token);
+                            if (in_set_delimiter) {
+                                assert token.length() == 1;
+                                delimiter = charat(token, 0);
+                                statements.add(buffer.toString());
+                                buffer.setLength(0);
+                                q = p + 1;
+                                in_set_delimiter = false;
+                            } else {
+                                buffer.append(" ");
+                                if ("DELIMITER".equals(token)) {
+                                    in_set_delimiter = true;
+                                }
+                            }
                         }
                     }
                     p = q;
@@ -78,15 +94,13 @@ public class SqlScript {
                 // skip whitespace
                 p = q;
             }
-
-            // if the token starts with -- then change state to in-line-comment
-            // if the token ends with the current delimiter then add the current buffer as the next statement
-            // otherwise append to the current buffer
-
         }
-        System.out.println(buffer.toString());
-
         return statements;
+    }
+
+    private boolean is_single_line_comment(String input, int p, int q) {
+        return (at(input, p, q, '-') && at(input, p, q + 1, '-'))
+                || (at(input, p, q, '/') && at(input, p, q + 1, '/'));
     }
 
     private int scan(String input, int start, int n, long lmask, long hmask) {
