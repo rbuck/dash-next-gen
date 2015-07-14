@@ -46,7 +46,7 @@ There are a number of user configurable properties within Dash; users may
 override their default values by supplying them as system properties, or
 declare them in the conf.yml file. Properties declared within the conf.yml
 file override the defaults, and those declared as system properties override
-those declared by the application.properties file as well as the defaults.
+those declared by either.
 
 Most properties have reasonable defaults; those properties that do not have
 default values MUST BE declared by the user. See the tables below for further
@@ -117,47 +117,54 @@ twelve (12) properties, making their own declarations fit on a single line.
 
 You can also declare non-single tests, such as the mix defined in MIX_1.
 
+    NUODB: &nuodb
+      dash.db.host: localhost
+      dash.db.type: nuodb
+    
     DEFAULTS: &defaults
       dash.driver.rates.limit: 500000
       dash.driver.burst.limit: 800000
-      dash.driver.duration: !env $(workload.duration:30)
-      dash.driver.threads: !env $(workload.threads:32)
-      dash.workload.class: com.github.rbuck.dash.sample.Sample
-      dash.db.name: test
-      dash.db.schema: test
+      dash.driver.duration: !env $(dash.driver.duration:30)
+      dash.driver.threads: !env $(dash.driver.threads:32)
+      dash.driver.class: com.github.rbuck.dash.services.cloud.BusinessServices
+      dash.db.name: cloud
+      dash.db.schema: cloud
       dash.db.user: dba
       dash.db.password: dba
-      dash.db.type: nuodb
       dash.db.pool.type: hikaricp
       dash.db.transaction.autocommit: true
       dash.db.transaction.readonly: false
+      # n.b. BoneCP does not use the TRANSACTION_ prefix for isolation level naming!
       dash.db.transaction.isolation: TRANSACTION_READ_COMMITTED
-      dash.metrics.service.reporters: [csv,console,elasticsearch]
+      dash.metrics.service.reporters: [csv,console]
       dash.metrics.service.elasticsearch.hosts: ['localhost:9200']
+    
+    CLOUD_MIX: &cloud
+      <<: *defaults
+      dash.workload.tag: [OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]
+      dash.workload.mix: [10,20,30,20,20]
+    
+    NUODB_MIX:
+      <<: *cloud
+      <<: *nuodb
 
-    SINGLE: &single
-      <<: *defaults
-      dash.workload.mix: 100
-      dash.workload.tag: !env $(dash.workload.tag:create)
-    
-    # traditional style...
-    CREATE:
-      <<: *single
-      dash.workload.tag: create
-    
-    # or flow style...
-    DELETE: {<<: *single, dash.workload.tag: delete}
-    
-    # etc...
-    
-    MIX_1:
-      <<: *defaults
-      dash.workload.tag: [create,delete]
-      dash.workload.mix: [50,50]
+Using this simple pattern, switching over to running the test against MySQL
+can be accomplished simply (other supported databases are similar):
+
+    # -- conf.yml --
+    MYSQL: &mysql
+      dash.db.host: 172.16.211.146
+      dash.db.type: mysql
+
+    MYSQL_MIX:
+      <<: *cloud
+      <<: *mysql
+
+    $ run.sh -t MYSQL_MIX
 
 ## Dependencies
 
-None, entirely self-contained.
+None, entirely self-contained. (TODO: a few jars are still brought in from Maven Central, will be addressed).
 
 ## Execution
 
@@ -179,27 +186,27 @@ First off, verify your configuration in conf.yml, and noting the test names.
 The preferred way to run the application is to run it using the run.sh script.
 Here is an example of running a 50/50 test mix for this/that operations:
 
-    $ ./run.sh -t MIX_1
-    
-    Name        Count       Rate        Min      Max      Mean     Std Dev  Median   75%      95%      98%      99%      99.9%
-    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    this        18005596    2793639     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    this        40948025    3578840     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    this        63710613    3874956     0.00     0.01     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    this        85940803    4008354     0.00     0.01     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    this        108056113   4086774     0.00     0.01     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    that        0           0           0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    this        127769973   4063944     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00     0.00
-    
-    Time: 30.929
-    
-    OK (1 test)
+    $ ./run.sh -t NUODB_MIX
+
+    [2015-07-14T10:19:21.855] created
+    [2015-07-14T10:19:23.120] started
+    Name        Count       Rate        Min      Max      Mean     Std Dev  Median   75%      95%      98%      99%      99.9%     
+    OLTP_C1     3662        729         0.62     50.90    4.61     3.73     3.69     5.44     10.93    15.98    20.60    25.90    
+    OLTP_C2     6485        1291        0.50     34.32    5.97     3.96     4.98     7.24     13.50    17.96    21.89    29.66    
+    OLTP_C3     9675        1925        0.38     44.88    5.64     4.93     4.67     7.50     14.82    18.86    23.69    40.82    
+    OLTP_R2     6589        1310        0.32     28.46    3.57     3.10     2.59     4.30     9.69     13.16    16.00    24.33    
+    OLTP_R3     6502        1292        0.39     46.09    4.15     3.69     3.07     5.12     10.93    15.07    17.99    28.72    
+    ...
+    [2015-07-14T10:19:43.872] stopped
+    [2015-07-14T10:19:43.873] destroyed
 
 The Count column is the total number of calls to the test case performed.
 The Rate is measured in TPS. The remaining columns are all measured in
 milliseconds. The right five columns are the quantiles. The middle three
 are measured over a rolling window of time.
+
+# Known Issues
+
+1. The SQL statement splitter that enables running SQL scripts, it's rather
+   poorly implemented. I am rewriting a new one and will toss that old rag
+   into the trash shortly. Consequently, you need to load the DDL manually.

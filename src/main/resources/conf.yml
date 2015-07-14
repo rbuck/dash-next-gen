@@ -24,14 +24,15 @@ DEFAULTS: &defaults
   dash.metrics.service.reporters: [csv,console]
   dash.metrics.service.elasticsearch.hosts: ['localhost:9200']
 
-NUODB_MIX:
+CLOUD_MIX: &cloud
   <<: *defaults
-  <<: *nuodb
   dash.workload.tag: [OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]
   dash.workload.mix: [10,20,30,20,20]
 
+NUODB_MIX:
+  <<: *cloud
+  <<: *nuodb
+
 MYSQL_MIX:
-  <<: *defaults
+  <<: *cloud
   <<: *mysql
-  dash.workload.tag: [OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]
-  dash.workload.mix: [10,20,30,20,20]
