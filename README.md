@@ -8,6 +8,64 @@ concurrently using specified percentages of each. The latter point here is a
 significant differentiator for this framework that distinguishes if from other
 performance test frameworks.
 
+## Build
+
+Simply use Maven 3.x:
+
+    $ mvn clean install
+
+In the target directory will be a .tar.gz distribution. Simply unzip that
+somewhere to run. Details on running and configuring the demos follow.  
+
+## Execution
+
+This section covers how to run a demo. You will learn about command line
+syntax, options, and options defaults.
+
+### Command Line Interface
+
+The command line accepts the following options:
+
+|        Option        | Description                      | Default              |
+| :-------------------- |:--------------------------------| ---------------------|
+| -h, --help           | show this help message and exit |  |
+| -c CONF, --conf CONF | the config file containing the test specification to run | ../conf/conf.yml |
+| -t TEST, --test TEST | the name of the test to run   |             |
+| -v, --version        | print the version number           |                    |
+
+### Running the Application
+
+First off, verify your configuration in conf.yml, and noting the test names.
+
+The preferred way to run the application is to run it using the run.sh script.
+Here is an example of running the cloud demo:
+
+    $ ./run.sh -t NUODB_MIX
+
+    [2015-07-14T10:19:21.855] created
+    [2015-07-14T10:19:23.120] started
+    Name        Count       Rate        Min      Max      Mean     Std Dev  Median   75%      95%      98%      99%      99.9%     
+    OLTP_C1     3662        729         0.62     50.90    4.61     3.73     3.69     5.44     10.93    15.98    20.60    25.90    
+    OLTP_C2     6485        1291        0.50     34.32    5.97     3.96     4.98     7.24     13.50    17.96    21.89    29.66    
+    OLTP_C3     9675        1925        0.38     44.88    5.64     4.93     4.67     7.50     14.82    18.86    23.69    40.82    
+    OLTP_R2     6589        1310        0.32     28.46    3.57     3.10     2.59     4.30     9.69     13.16    16.00    24.33    
+    OLTP_R3     6502        1292        0.39     46.09    4.15     3.69     3.07     5.12     10.93    15.07    17.99    28.72    
+    ...
+    [2015-07-14T10:19:43.872] stopped
+    [2015-07-14T10:19:43.873] destroyed
+
+The Count column is the total number of calls to the test case performed.
+The Rate is measured in TPS. The remaining columns are all measured in
+milliseconds. The right five columns are the quantiles. The middle three
+are measured over a rolling window of time.
+
+## Logging Output
+
+The framework will create a log directory. In that directory will be two
+sorts of files: the dash.log (has logging output, errors, etc), and many
+CSV files, one CSV for each test case measured. The CSV output is handy
+if you want to plot TPS or latency over time in tools such as R or Excel.
+
 ## Concepts
 
 There are a few essential concepts that must be understood in order to effectively
@@ -165,45 +223,6 @@ can be accomplished simply (other supported databases are similar):
 ## Dependencies
 
 None, entirely self-contained. (TODO: a few jars are still brought in from Maven Central, will be addressed).
-
-## Execution
-
-### Command Line Interface
-
-The command line accepts the following options:
-
-|        Option        | Description                      | Default              |
-| :-------------------- |:--------------------------------| ---------------------|
-| -h, --help           | show this help message and exit |  |
-| -c CONF, --conf CONF | the config file containing the test specification to run | ../conf/conf.yml |
-| -t TEST, --test TEST | the name of the test to run   |             |
-| -v, --version        | print the version number           |                    |
-
-### Running the Application
-
-First off, verify your configuration in conf.yml, and noting the test names.
-
-The preferred way to run the application is to run it using the run.sh script.
-Here is an example of running the cloud demo:
-
-    $ ./run.sh -t NUODB_MIX
-
-    [2015-07-14T10:19:21.855] created
-    [2015-07-14T10:19:23.120] started
-    Name        Count       Rate        Min      Max      Mean     Std Dev  Median   75%      95%      98%      99%      99.9%     
-    OLTP_C1     3662        729         0.62     50.90    4.61     3.73     3.69     5.44     10.93    15.98    20.60    25.90    
-    OLTP_C2     6485        1291        0.50     34.32    5.97     3.96     4.98     7.24     13.50    17.96    21.89    29.66    
-    OLTP_C3     9675        1925        0.38     44.88    5.64     4.93     4.67     7.50     14.82    18.86    23.69    40.82    
-    OLTP_R2     6589        1310        0.32     28.46    3.57     3.10     2.59     4.30     9.69     13.16    16.00    24.33    
-    OLTP_R3     6502        1292        0.39     46.09    4.15     3.69     3.07     5.12     10.93    15.07    17.99    28.72    
-    ...
-    [2015-07-14T10:19:43.872] stopped
-    [2015-07-14T10:19:43.873] destroyed
-
-The Count column is the total number of calls to the test case performed.
-The Rate is measured in TPS. The remaining columns are all measured in
-milliseconds. The right five columns are the quantiles. The middle three
-are measured over a rolling window of time.
 
 # Known Issues
 
