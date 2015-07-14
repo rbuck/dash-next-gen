@@ -47,6 +47,10 @@ public class SqlScript {
                 } else {
                     if (!in_skip) {
                         token = substring(input, p, q);
+                        // before appending to the current buffer,
+                        // ensure that we don't have a semicolon
+                        // surrounded by two terms. split in such
+                        // scenarios.
                         int d = seek(token, delimiter);
                         if (d > 0) {
                             buffer.append(token.substring(0, d));
