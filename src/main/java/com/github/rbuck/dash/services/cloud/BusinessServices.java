@@ -225,7 +225,11 @@ public class BusinessServices extends AbstractService {
                 new FixedInterval(1, 100),
                 new DataSourceContext());
 
-        loadDataModel();
+        // the sql-splitter has a number of bugs in it
+        // so it won't work for many scenarios...
+        if (dialect.getName().equals("nuodb")) {
+            loadDataModel();
+        }
 
         // reporting services...
 

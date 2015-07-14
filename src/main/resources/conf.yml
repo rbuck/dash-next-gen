@@ -1,39 +1,37 @@
+MYSQL: &mysql
+  dash.db.host: 172.16.211.146
+  dash.db.type: mysql
+
+NUODB: &nuodb
+  dash.db.host: localhost
+  dash.db.type: nuodb
+
 DEFAULTS: &defaults
   dash.driver.rates.limit: 500000
   dash.driver.burst.limit: 800000
   dash.driver.duration: !env $(dash.driver.duration:30)
   dash.driver.threads: !env $(dash.driver.threads:32)
   dash.driver.class: com.github.rbuck.dash.services.cloud.BusinessServices
-  dash.db.host: localhost
   dash.db.name: cloud
   dash.db.schema: cloud
   dash.db.user: dba
   dash.db.password: dba
-  dash.db.type: nuodb
   dash.db.pool.type: hikaricp
   dash.db.transaction.autocommit: true
   dash.db.transaction.readonly: false
   # n.b. BoneCP does not use the TRANSACTION_ prefix for isolation level naming!
   dash.db.transaction.isolation: TRANSACTION_READ_COMMITTED
-  dash.metrics.service.reporters: [csv,console,elasticsearch]
+  dash.metrics.service.reporters: [csv,console]
   dash.metrics.service.elasticsearch.hosts: ['localhost:9200']
 
-SINGLE: &single
+NUODB_MIX:
   <<: *defaults
-  dash.workload.mix: 100
-  dash.workload.tag: !env $(dash.workload.tag:create)
+  <<: *nuodb
+  dash.workload.tag: [OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]
+  dash.workload.mix: [10,20,30,20,20]
 
-# traditional style...
-CREATE:
-  <<: *single
-  dash.workload.tag: create
-
-# or flow style...
-DELETE: {<<: *single, dash.workload.tag: delete}
-
-# etc...
-
-MIX_1:
+MYSQL_MIX:
   <<: *defaults
+  <<: *mysql
   dash.workload.tag: [OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]
   dash.workload.mix: [10,20,30,20,20]
