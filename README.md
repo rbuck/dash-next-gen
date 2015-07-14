@@ -184,7 +184,7 @@ The command line accepts the following options:
 First off, verify your configuration in conf.yml, and noting the test names.
 
 The preferred way to run the application is to run it using the run.sh script.
-Here is an example of running a 50/50 test mix for this/that operations:
+Here is an example of running the cloud demo:
 
     $ ./run.sh -t NUODB_MIX
 
