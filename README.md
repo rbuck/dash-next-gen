@@ -209,4 +209,5 @@ are measured over a rolling window of time.
 
 1. The SQL statement splitter that enables running SQL scripts, it's rather
    poorly implemented. I am rewriting a new one and will toss that old rag
-   into the trash shortly. Consequently, you need to load the DDL manually.
+   into the trash shortly. Consequently, for databases other than NuoDB you
+   need to load the DDL manually.
