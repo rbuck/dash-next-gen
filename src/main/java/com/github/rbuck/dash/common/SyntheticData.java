@@ -11,7 +11,7 @@ public class SyntheticData {
     private static final Random random;
 
     static {
-        random = new Random(31);
+        random = new Random();
     }
 
     public static String genRandString(int length) {
