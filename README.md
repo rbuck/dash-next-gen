@@ -220,6 +220,31 @@ can be accomplished simply (other supported databases are similar):
 
     $ run.sh -t MYSQL_MIX
 
+## Why Not JUnit
+
+There are two fundamental issues with JUnit, and one additionally significant
+consequence of its first design choice.
+ 
+First issue is that JUnit creates a new test object instance for every test
+method contained in a class. Its aim was to keep tests side effect free, but
+that is non-sense reasoning as object oriented languages already have a means
+to accomplish that, the class.
+
+The consequence of this choice was a decision to introduce static methods
+and members for those situations where one-time initializations were required,
+for example when creating a reference to a JDBC connection pool. The problems
+related to static state are well known and therefore do not need to be repeated
+here.
+
+The second issue with JUnit is its runner and related tooling are not capable
+of allowing test methods to be run multiple times; for example, what if it were
+valid to not only check for correctness but also measure performance? Testing
+non-functional requirements is just as valid as functional ones, and JUnit is
+terrible for that as one would want multiple data points not just a single one,
+and perhaps with concurrent workload (another weakness of JUnit).
+
+All in all, a decision was made to abandon JUnit as the basis for Dash.
+
 ## Dependencies
 
 None, entirely self-contained. (TODO: a few jars are still brought in from Maven Central, will be addressed).

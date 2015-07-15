@@ -246,6 +246,11 @@ public class BusinessServices extends AbstractService {
         String sqlFile = dialect.getName() + "-dialect-install.sql";
         try {
             StringBuilder builder = Resources.loadResource(BusinessServices.class, sqlFile, new StringBuilder());
+
+            // todo: this is the new script parser integrated
+            //SqlScript sqlScript = new SqlScript();
+            //final List<String> statements = sqlScript.split(builder.toString());
+
             SqlScriptSplitter splitter = new SqlScriptSplitter();
             final List<String> statements = splitter.splitStatements(builder.toString());
             try {
