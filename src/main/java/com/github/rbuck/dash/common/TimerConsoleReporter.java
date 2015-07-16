@@ -1,4 +1,4 @@
-package com.github.rbuck.dash.common.metrics;
+package com.github.rbuck.dash.common;
 
 import com.codahale.metrics.*;
 

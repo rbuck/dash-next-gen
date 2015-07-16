@@ -4,7 +4,6 @@ import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.github.rbuck.dash.common.*;
-import com.github.rbuck.dash.common.metrics.TimerConsoleReporter;
 import com.github.rbuck.dash.services.AbstractService;
 import com.github.rbuck.dash.services.Context;
 import com.github.rbuck.retry.FixedInterval;
@@ -28,11 +27,13 @@ import static java.lang.System.getProperties;
  */
 public class BusinessServices extends AbstractService {
 
+    private final MetricRegistry metricRegistry = new MetricRegistry();
+    private final MetricsService metricsService = new MetricsService(metricRegistry);
+
     private volatile TimerConsoleReporter consoleReporter;
     private volatile CsvReporter csvReporter;
 
     private SqlRetryPolicy<Boolean> retryPolicy;
-    private MetricRegistry metricRegistry;
     private HashMap<String, Timer> meters;
     private Random random;
 
@@ -233,8 +234,6 @@ public class BusinessServices extends AbstractService {
 
         // reporting services...
 
-        metricRegistry = new MetricRegistry();
-
         mix = new Mix(properties);
         meters = new HashMap<>();
         for (Mix.Type type : mix) {
@@ -278,6 +277,7 @@ public class BusinessServices extends AbstractService {
     @Override
     public void start() throws Exception {
         super.start();
+        metricsService.start();
 
         consoleReporter = TimerConsoleReporter.forRegistry(metricRegistry)
                 .convertRatesTo(TimeUnit.SECONDS)
@@ -301,19 +301,8 @@ public class BusinessServices extends AbstractService {
     @Override
     public void stop() {
         try {
-            if (csvReporter != null) {
-                csvReporter.close();
-                csvReporter = null;
-            }
-        } catch (Exception e) {
-            // ignore
-        }
-        try {
-            if (consoleReporter != null) {
-                consoleReporter.close();
-                consoleReporter = null;
-            }
-        } catch (Exception e) {
+            metricsService.close();
+        } catch (IOException e) {
             // ignore
         }
         super.stop();
