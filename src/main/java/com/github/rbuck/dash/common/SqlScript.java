@@ -4,17 +4,22 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * This SQL parser behaves as follows:
+ * SQL syntax is comprised of three basic constituent elements:
  * <p/>
- * - the statements may be on the same or different lines
- * (line breaks are ignored).
+ * - tokens
+ * - whitespace
+ * - delimiters
  * <p/>
- * - the SQL statements are (by default) delimited by a semicolon
- * (this can be changed by the DELIMITER instruction)
+ * Delimiters terminate each statement.
+ * Tokens plus whitespace comprise a statement.
+ * Tokens are grammatical elements, identifiers, or punctuation.
  * <p/>
- * - two minus signs (--) appearing anywhere is taken as a
- * line comment – all the text from there to the end of the
- * line will be removed from your SQL
+ * For the purposes of parsing a SQL script into its individual statements
+ * one may ignore SQL semantics and focus solely on tokens, whitespace, and
+ * delimiters. That is what this parser does.
+ * <p/>
+ * The only SQL semantics this parser is aware of are comments. Of these,
+ * both double-hyphen and double-forward-slash line comments are supported.
  */
 public class SqlScript {
 
