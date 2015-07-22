@@ -87,12 +87,12 @@ public class SqlScript {
                 continue;
             }
 
-            // handle whitespace
+            // handle whitespace, but one at a time...
             q = scan(input, p, p + 1, L_WHITESPACE, H_WHITESPACE);
             if (q > p) {
                 // handle whitespace
                 if (in_single_line_comment && at(input, p, q, '\n')) {
-                    // newlines terminate single line comments
+                    // ... for newlines terminate single line comments
                     in_single_line_comment = false;
                     in_skip = false;
                 }
