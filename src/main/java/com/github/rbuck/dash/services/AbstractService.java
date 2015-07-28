@@ -12,6 +12,7 @@ import static java.lang.System.getProperties;
 
 /**
  * An abstraction for a concurrent business service simulation.
+ * @see Service
  */
 public abstract class AbstractService implements Service {
 
@@ -139,6 +140,7 @@ public abstract class AbstractService implements Service {
      * Create a concurrency context.
      *
      * @return the context for a thread
+     * @see Context
      */
     protected abstract Context createContext();
 
@@ -146,6 +148,7 @@ public abstract class AbstractService implements Service {
      * Execute a business service providing the associated context.
      *
      * @param context the business context for the associated activity and thread
+     * @see Context
      */
     protected abstract void execute(Context context);
 

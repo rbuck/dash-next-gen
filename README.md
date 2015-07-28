@@ -8,6 +8,37 @@ concurrently using specified percentages of each. The latter point here is a
 significant differentiator for this framework that distinguishes if from other
 performance test frameworks.
 
+## Extension
+
+Dash is also a framework that allows extension to support additional workloads
+through the standard Java Service Loader infrastructure, which has been part
+of the JRE formally as infrastructure since JDK 1.7, and part of the JRE 
+informally since 1.18.
+
+To add your own sample workload, declare a suitably named child package within
+the services package, and create a Java class that extends AbstractService.
+You must implement two abstract methods:
+
+    protected abstract Context createContext();
+    
+    protected abstract void execute(Context context);
+
+The purpose of the first method is to define an execution context (state)
+to pass to the second method; you define the execution context as either
+per thread or as a singleton.
+
+The purpose of the second method is to contain the test code, which itself
+typically dispatches into one of several other business use case methods
+depending upon the mix. Read the samples provided for more detail.
+
+Read the documentation associated to those methods for full detail on their
+purpose and also read the detailed documentation on the Context and Service
+class.
+
+By default the execution of test code (above) will be threaded, and if you
+want to control the number of threads you do so through a property defined
+below.
+
 ## Building / Packaging
 
 Simply use Maven 3.x:
