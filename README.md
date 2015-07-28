@@ -39,6 +39,11 @@ By default the execution of test code (above) will be threaded, and if you
 want to control the number of threads you do so through a property defined
 below.
 
+The final item you need to add is a Service Loader hook, namely, to the
+META-INF/services/com.github.rbuck.dash.services.Service file add the name
+of the class you created above. If the file does not exist, add it as a
+resource.
+
 ## Building / Packaging
 
 Simply use Maven 3.x:
