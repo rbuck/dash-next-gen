@@ -35,7 +35,7 @@ public class Main {
     public static void main(String[] args) {
         loadEnvironment(args);
 
-        final CountDownLatch shutdownCompleteLatch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(1);
         final Container container = new Container();
         container.addStatusChangeListener(new Container.StatusChangeListener() {
             @Override
@@ -44,7 +44,7 @@ public class Main {
                 // down, also shut down the application. An event could be a
                 // failure of some sort, or it could be that the job completed.
                 if (Container.Status.STOPPED == changeEvent.getStatus()) {
-                    doStop(shutdownCompleteLatch, container);
+                    doStop(latch, container);
                 }
             }
         });
@@ -52,7 +52,7 @@ public class Main {
             @Override
             public void run() {
                 // if a control-c occurs, properly halt the container.
-                doStop(shutdownCompleteLatch, container);
+                doStop(latch, container);
             }
         };
         // add a control-c hook that stops the container cleanly...
@@ -60,16 +60,20 @@ public class Main {
 
         try {
             container.start();
+
+            // the latch should be waited upon in only two cases:
+            // control-c was triggered, or the container itself
+            // shutdown, b/c perhaps the test completed.
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                // ignore
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception | Error e) {
             panic(Exceptions.toStringAllCauses(e), e);
         } finally {
-            try {
-                shutdownCompleteLatch.await();
-            } catch (InterruptedException e) {
-                // ignore
-            }
             try {
                 Runtime.getRuntime().removeShutdownHook(shutdownThread);
             } catch (IllegalStateException e) {

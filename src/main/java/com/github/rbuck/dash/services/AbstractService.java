@@ -12,6 +12,7 @@ import static java.lang.System.getProperties;
 
 /**
  * An abstraction for a concurrent business service simulation.
+ *
  * @see Service
  */
 public abstract class AbstractService implements Service {
@@ -23,6 +24,13 @@ public abstract class AbstractService implements Service {
         STARTED,
         STOPPED,
         DESTROYED
+    }
+
+    private static final ThreadGroup threadGroup;
+
+    static {
+        threadGroup = new ThreadGroup("dash-service-threads");
+        threadGroup.setDaemon(true);
     }
 
     private Thread[] threads;
@@ -69,7 +77,7 @@ public abstract class AbstractService implements Service {
             final Limiter limiter = createLimiter();
             for (int i = 0; i < getThreadCount(); i++) {
                 final Context localContext = context;
-                threads[i] = new Thread() {
+                threads[i] = new Thread(threadGroup, Integer.toString(i)) {
                     @Override
                     public void run() {
                         try {

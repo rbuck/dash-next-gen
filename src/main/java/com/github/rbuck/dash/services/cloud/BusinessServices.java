@@ -10,11 +10,12 @@ import com.github.rbuck.retry.FixedInterval;
 import com.github.rbuck.retry.SqlCallable;
 import com.github.rbuck.retry.SqlRetryPolicy;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.*;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.System.getProperties;
@@ -278,24 +279,6 @@ public class BusinessServices extends AbstractService {
     public void start() throws Exception {
         super.start();
         metricsService.start();
-
-        consoleReporter = TimerConsoleReporter.forRegistry(metricRegistry)
-                .convertRatesTo(TimeUnit.SECONDS)
-                .convertDurationsTo(TimeUnit.MILLISECONDS).build();
-        consoleReporter.start(5, TimeUnit.SECONDS);
-
-        String logDirString = PropertiesHelper.getStringProperty(getProperties(), "dash.log.dir", null);
-        if (logDirString != null) {
-            File logDir = new File(logDirString);
-            if (logDir.exists()) {
-                csvReporter = CsvReporter.forRegistry(metricRegistry)
-                        .formatFor(Locale.US)
-                        .convertRatesTo(TimeUnit.SECONDS)
-                        .convertDurationsTo(TimeUnit.MILLISECONDS)
-                        .build(logDir);
-                csvReporter.start(5, TimeUnit.SECONDS);
-            }
-        }
     }
 
     @Override
