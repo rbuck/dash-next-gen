@@ -70,7 +70,10 @@ public class SqlScript {
                             if (in_set_delimiter) {
                                 assert token.length() == 1;
                                 delimiter = charat(token, 0);
-                                statements.add(buffer.toString());
+                                // BEGIN NUODB DEFECT
+                                // nuodb defect: Operator delimiter is not yet implemented
+                                //statements.add(buffer.toString());
+                                // END NUODB DEFECT
                                 buffer.setLength(0);
                                 q = p + 1;
                                 in_set_delimiter = false;
@@ -91,12 +94,15 @@ public class SqlScript {
             q = scan(input, p, p + 1, L_WHITESPACE, H_WHITESPACE);
             if (q > p) {
                 // handle whitespace
-                if (in_single_line_comment && at(input, p, q, '\n')) {
-                    // ... for newlines terminate single line comments
-                    in_single_line_comment = false;
-                    in_skip = false;
+                if (at(input, p, q, '\n')) {
+                    if (in_single_line_comment) {
+                        // ... for newlines terminate single line comments
+                        in_single_line_comment = false;
+                        in_skip = false;
+                    }
+                    // preserve carriage returns for triggers and stored procedures...
+                    buffer.append('\n');
                 }
-                // skip whitespace
                 p = q;
             }
         }
@@ -104,8 +110,8 @@ public class SqlScript {
     }
 
     private boolean is_single_line_comment(String input, int p, int q) {
-        return (at(input, p, q, '-') && at(input, p, q + 1, '-'))
-                || (at(input, p, q, '/') && at(input, p, q + 1, '/'));
+        return (at(input, p, q, '-') && at(input, p + 1, q + 1, '-'))
+                || (at(input, p, q, '/') && at(input, p + 1, q + 1, '/'));
     }
 
     private int scan(String input, int start, int n, long lmask, long hmask) {

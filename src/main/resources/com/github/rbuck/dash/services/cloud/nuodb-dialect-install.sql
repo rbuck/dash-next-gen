@@ -129,7 +129,7 @@ SET DELIMITER @
 CREATE TRIGGER object_insert FOR object AFTER INSERT
 AS
     UPDATE container_stat SET
-        object_count = object_count +1,
+        object_count = object_count + 1,
         bytes_used = bytes_used + NEW.size
     WHERE container_id = NEW.container_id;
 END_TRIGGER;
