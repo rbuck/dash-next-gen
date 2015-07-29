@@ -25,7 +25,13 @@ You must implement two abstract methods:
 
 The purpose of the first method is to define an execution context (state)
 to pass to the second method; you define the execution context as either
-per thread or as a singleton.
+per thread or as a singleton. When thinking about execution contexts,
+you'd want custom ones when you either want to avoid contention, or you
+want to implement a state machine where an action dictates permissible
+subsequent actions.
+
+- Do you want to test a contended use case, or non-contended?
+- Do you want to test where prior action dictates future action?
 
 The purpose of the second method is to contain the test code, which itself
 typically dispatches into one of several other business use case methods
