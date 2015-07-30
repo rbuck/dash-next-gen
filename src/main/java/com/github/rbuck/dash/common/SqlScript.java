@@ -62,7 +62,7 @@ public class SqlScript {
                             // this does not append the trailing delimiter
                             // as they are unnecessary
                             buffer.append(token.substring(0, d));
-                            statements.add(buffer.toString());
+                            statements.add(buffer.toString().trim());
                             buffer.setLength(0);
                             q = p + d + 1;
                         } else {
@@ -110,8 +110,8 @@ public class SqlScript {
     }
 
     private boolean is_single_line_comment(String input, int p, int q) {
-        return (at(input, p, q, '-') && at(input, p + 1, q + 1, '-'))
-                || (at(input, p, q, '/') && at(input, p + 1, q + 1, '/'));
+        return q < input.length() && ((at(input, p, q, '-') && at(input, p + 1, q + 1, '-'))
+                || (at(input, p, q, '/') && at(input, p + 1, q + 1, '/')));
     }
 
     private int scan(String input, int start, int n, long lmask, long hmask) {
