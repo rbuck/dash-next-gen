@@ -23,8 +23,7 @@ CREATE TABLE account (
   description            VARCHAR(1024)             DEFAULT '',
 
   permissible_containers INTEGER                   DEFAULT 100
-)
-  ENGINE = InnoDB;
+);
 
 CREATE UNIQUE INDEX idx_account_urn ON account (urn);
 CREATE INDEX idx_account_name ON account (name);
@@ -34,8 +33,7 @@ CREATE TABLE account_stat (
   container_count INTEGER DEFAULT 0,
   object_count    INTEGER DEFAULT 0,
   bytes_used      INTEGER DEFAULT 0
-)
-  ENGINE = InnoDB;
+);
 
 CREATE UNIQUE INDEX idx_account_stat_account_id ON account_stat (account_id);
 
@@ -49,8 +47,7 @@ CREATE TABLE container (
   created_at  TIMESTAMP                DEFAULT CURRENT_TIMESTAMP, -- must be set to current time
   modified_at TIMESTAMP NULL           DEFAULT NULL, -- must be set to current time
   deleted_at  TIMESTAMP NULL           DEFAULT NULL
-)
-  ENGINE = InnoDB;
+);
 
 CREATE UNIQUE INDEX idx_container_name ON container (name);
 CREATE INDEX idx_container_account_id ON container (account_id);
@@ -60,8 +57,7 @@ CREATE TABLE container_stat (
   container_id BIGINT REFERENCES container (id), -- foreign
   object_count BIGINT DEFAULT 0,
   bytes_used   BIGINT DEFAULT 0
-)
-  ENGINE = InnoDB;
+);
 
 CREATE UNIQUE INDEX idx_container_stat_container_id ON container_stat (container_id);
 
@@ -80,8 +76,7 @@ CREATE TABLE object (
 
   content_type TEXT,
   etag         TEXT
-)
-  ENGINE = InnoDB;
+);
 
 CREATE INDEX ix_object_container_name ON object (container_id, name);
 CREATE INDEX ix_object_random_id ON object (rand_id);
