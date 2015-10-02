@@ -9,14 +9,16 @@ import java.util.List;
 public class SqlScriptTest {
     @Test
     public void testIt() {
-        String sqlFile = "nuodb-dialect-install.sql";
-        try {
-            StringBuilder builder = Resources.loadResource(BusinessServices.class, sqlFile, new StringBuilder());
-            SqlScript splitter = new SqlScript();
-            final List<String> statements = splitter.split(builder.toString());
-            System.out.println("done");
-        } catch (IOException e) {
-            e.printStackTrace();
+        String[] sqlFiles = {"mysql-dialect-install.sql", "nuodb-dialect-install.sql"};
+        for (String sqlFile : sqlFiles) {
+            try {
+                StringBuilder builder = Resources.loadResource(BusinessServices.class, sqlFile, new StringBuilder());
+                SqlScript splitter = new SqlScript();
+                final List<String> statements = splitter.split(builder.toString());
+                System.out.println("done");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

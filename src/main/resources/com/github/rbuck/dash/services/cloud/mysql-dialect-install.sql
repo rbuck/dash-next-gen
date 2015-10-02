@@ -1,5 +1,6 @@
 -- comment
   -- indented comment
+CREATE DATABASE IF NOT EXISTS cloud;
 USE cloud;
 
 DROP TABLE IF EXISTS object CASCADE;
@@ -29,7 +30,7 @@ CREATE UNIQUE INDEX idx_account_urn ON account (urn);
 CREATE INDEX idx_account_name ON account (name);
 
 CREATE TABLE account_stat (
-  account_id      BIGINT REFERENCES account (id), -- foreign
+  account_id      BIGINT NOT NULL,
   container_count INTEGER DEFAULT 0,
   object_count    INTEGER DEFAULT 0,
   bytes_used      INTEGER DEFAULT 0
@@ -38,8 +39,8 @@ CREATE TABLE account_stat (
 CREATE UNIQUE INDEX idx_account_stat_account_id ON account_stat (account_id);
 
 CREATE TABLE container (
-  id          BIGINT    NOT NULL       AUTO_INCREMENT PRIMARY KEY,
-  account_id  BIGINT REFERENCES account (id), -- foreign
+  id          BIGINT                   AUTO_INCREMENT PRIMARY KEY,
+  account_id  BIGINT    NOT NULL,
   rand_id     DOUBLE,
 
   name        VARCHAR(64), -- globally unique (contention)
@@ -54,7 +55,7 @@ CREATE INDEX idx_container_account_id ON container (account_id);
 CREATE INDEX ix_container_random_id ON container (rand_id);
 
 CREATE TABLE container_stat (
-  container_id BIGINT REFERENCES container (id), -- foreign
+  container_id BIGINT NOT NULL,
   object_count BIGINT DEFAULT 0,
   bytes_used   BIGINT DEFAULT 0
 );
@@ -63,7 +64,7 @@ CREATE UNIQUE INDEX idx_container_stat_container_id ON container_stat (container
 
 CREATE TABLE object (
   id           BIGINT    NOT NULL          AUTO_INCREMENT PRIMARY KEY,
-  container_id BIGINT REFERENCES container (id), -- foreign
+  container_id BIGINT    NOT NULL,
   rand_id      DOUBLE,
 
   name         VARCHAR(64), -- unique per container
@@ -144,7 +145,7 @@ FOR EACH ROW
 DELIMITER ;
 
 DELIMITER |
-CREATE TRIGGER container_delete
+CREATE TRIGGER trg_container_delete
 BEFORE DELETE ON container
 FOR EACH ROW
   BEGIN

@@ -99,7 +99,7 @@ CREATE INDEX ix_object_random_id ON object (rand_id);
 -- create stored procedures
 
 SET DELIMITER @
-CREATE TRIGGER object_update FOR OBJECT BEFORE UPDATE
+CREATE TRIGGER trg_object_update FOR OBJECT BEFORE UPDATE
   AS
   THROW  'UPDATE not allowed; DELETE and INSERT';
 END_TRIGGER;
@@ -107,7 +107,7 @@ END_TRIGGER;
 SET DELIMITER ;
 
 SET DELIMITER @
-CREATE TRIGGER account_insert FOR account AFTER INSERT
+CREATE TRIGGER trg_account_insert FOR account AFTER INSERT
 AS
     INSERT INTO account_stat (account_id) VALUES (NEW.id);
 END_TRIGGER;
@@ -115,7 +115,7 @@ END_TRIGGER;
 SET DELIMITER ;
 
 SET DELIMITER @
-CREATE TRIGGER container_insert FOR container AFTER INSERT
+CREATE TRIGGER trg_container_insert FOR container AFTER INSERT
 AS
     INSERT INTO container_stat (container_id) VALUES (NEW.id);
     UPDATE account_stat SET
@@ -126,7 +126,7 @@ END_TRIGGER;
 SET DELIMITER ;
 
 SET DELIMITER @
-CREATE TRIGGER object_insert FOR object AFTER INSERT
+CREATE TRIGGER trg_object_insert FOR object AFTER INSERT
 AS
     UPDATE container_stat SET
         object_count = object_count + 1,
@@ -137,7 +137,7 @@ END_TRIGGER;
 SET DELIMITER ;
 
 SET DELIMITER @
-CREATE TRIGGER container_delete FOR container BEFORE DELETE
+CREATE TRIGGER trg_container_delete FOR container BEFORE DELETE
 AS
     INSERT INTO container_stat (container_id) VALUES (NEW.id);
     UPDATE account_stat SET
@@ -148,7 +148,7 @@ END_TRIGGER;
 SET DELIMITER ;
 
 SET DELIMITER @
-CREATE TRIGGER object_delete FOR object BEFORE DELETE
+CREATE TRIGGER trg_object_delete FOR object BEFORE DELETE
 AS
     UPDATE container_stat SET
         object_count = object_count - 1,
