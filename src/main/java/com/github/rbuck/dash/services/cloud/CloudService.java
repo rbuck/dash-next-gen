@@ -22,11 +22,11 @@ import static java.lang.System.getProperties;
 
 /**
  * A cloud style workload runner that illustrates:
- * <p/>
+ * <p>
  * - best practices
  * - scale out and resiliency
  */
-public class BusinessServices extends AbstractService {
+public class CloudService extends AbstractService {
 
     private final MetricRegistry metricRegistry = new MetricRegistry();
     private final MetricsService metricsService = new MetricsService(metricRegistry);
@@ -41,21 +41,21 @@ public class BusinessServices extends AbstractService {
     private Dialect dialect;
     private Mix mix;
 
-    public BusinessServices() {
+    public CloudService() {
     }
 
-    class BusinessContext implements Context {
+    class CloudContext implements Context {
 
         final AtomicLong counter;
         final String identity;
 
-        BusinessContext() {
+        CloudContext() {
             this.counter = new AtomicLong(0);
             this.identity = SyntheticData.genRandString(15);
         }
     }
 
-    private void createAccount(BusinessContext context, Connection connection) throws SQLException {
+    private void createAccount(CloudContext context, Connection connection) throws SQLException {
         try (PreparedStatement putUser = connection.prepareStatement(dialect.getSqlStatement("PUT_ACCOUNT"))) {
             putUser.setString(1, getNextUrn(context)); // unique
             putUser.setString(2, SyntheticData.genRandString(20)); // name
@@ -64,7 +64,7 @@ public class BusinessServices extends AbstractService {
         }
     }
 
-    private void createContainer(BusinessContext context, Connection connection) throws SQLException {
+    private void createContainer(CloudContext context, Connection connection) throws SQLException {
         long time = System.currentTimeMillis();
         String urn = getRandUrn(context);
         if (urn != null) {
@@ -89,7 +89,7 @@ public class BusinessServices extends AbstractService {
         }
     }
 
-    private void createObject(BusinessContext context, Connection connection) throws SQLException {
+    private void createObject(CloudContext context, Connection connection) throws SQLException {
         long time = System.currentTimeMillis();
         String urn = getRandUrn(context);
         if (urn != null) {
@@ -125,7 +125,22 @@ public class BusinessServices extends AbstractService {
         }
     }
 
-    private void listContainers(BusinessContext context, Connection connection) throws SQLException {
+    private void calculateMeanObjectSize(Context context, Connection connection) throws SQLException {
+        try (PreparedStatement sizePs = connection.prepareStatement(dialect.getSqlStatement("GET_OBJECT_SIZE"))) {
+            try (ResultSet sizeRs = sizePs.executeQuery()) {
+                sizeRs.setFetchSize(1000);
+                int size = 0;
+                double mean = 0;
+                while (sizeRs.next()) {
+                    int curr = sizeRs.getInt(1);
+                    mean += (curr - mean) / size;
+                    ++size;
+                }
+            }
+        }
+    }
+
+    private void listContainers(CloudContext context, Connection connection) throws SQLException {
         String urn = getRandUrn(context);
         if (urn != null) {
             try (PreparedStatement userIdPs = connection.prepareStatement(dialect.getSqlStatement("GET_ACCOUNT_ID"))) {
@@ -153,7 +168,7 @@ public class BusinessServices extends AbstractService {
         }
     }
 
-    private void listObjects(BusinessContext context, Connection connection) throws SQLException {
+    private void listObjects(CloudContext context, Connection connection) throws SQLException {
         String urn = getRandUrn(context);
         if (urn != null) {
             try (PreparedStatement userIdPs = connection.prepareStatement(dialect.getSqlStatement("GET_ACCOUNT_ID"))) {
@@ -188,11 +203,11 @@ public class BusinessServices extends AbstractService {
         }
     }
 
-    private String getNextUrn(BusinessContext context) {
+    private String getNextUrn(CloudContext context) {
         return context.identity + ":" + context.counter.incrementAndGet();
     }
 
-    private String getRandUrn(BusinessContext context) {
+    private String getRandUrn(CloudContext context) {
         int count = context.counter.intValue();
         return count > 0 ? context.identity + ":" + random.nextInt(context.counter.intValue()) : null;
     }
@@ -208,7 +223,7 @@ public class BusinessServices extends AbstractService {
         // configuration...
 
         Properties properties = new Properties();
-        Resources.loadResource(BusinessServices.class, "application.properties", properties);
+        Resources.loadResource(CloudService.class, "application.properties", properties);
         properties.putAll(getProperties());
 
         // operational state...
@@ -218,7 +233,7 @@ public class BusinessServices extends AbstractService {
         // dialect and data sources...
 
         try {
-            dialect = new Dialect(BusinessServices.class);
+            dialect = new Dialect(CloudService.class);
         } catch (IOException e) {
             throw new IllegalArgumentException("Invalid dialect.");
         }
@@ -245,7 +260,7 @@ public class BusinessServices extends AbstractService {
     private void loadDataModel() {
         String sqlFile = dialect.getName() + "-dialect-install.sql";
         try {
-            StringBuilder builder = Resources.loadResource(BusinessServices.class, sqlFile, new StringBuilder());
+            StringBuilder builder = Resources.loadResource(CloudService.class, sqlFile, new StringBuilder());
 
             // n.b. a new sql script splitter that overcomes issues with
             // existing ones online, and deficiencies in those hard-coded
@@ -300,7 +315,7 @@ public class BusinessServices extends AbstractService {
 
     @Override
     protected void execute(Context context) {
-        final BusinessContext businessContext = (BusinessContext) context;
+        final CloudContext cloudContext = (CloudContext) context;
         Mix.Type type = mix.next();
         Timer timer = meters.get(type.getTag());
         try (Timer.Context ignore = timer.time()) {
@@ -309,7 +324,7 @@ public class BusinessServices extends AbstractService {
                     retryPolicy.action(new SqlCallable<Boolean>() {
                         @Override
                         public Boolean call(Connection connection) throws SQLException {
-                            createAccount(businessContext, connection);
+                            createAccount(cloudContext, connection);
                             return true;
                         }
                     });
@@ -319,7 +334,7 @@ public class BusinessServices extends AbstractService {
                     retryPolicy.action(new SqlCallable<Boolean>() {
                         @Override
                         public Boolean call(Connection connection) throws SQLException {
-                            createContainer(businessContext, connection);
+                            createContainer(cloudContext, connection);
                             return true;
                         }
                     });
@@ -329,7 +344,7 @@ public class BusinessServices extends AbstractService {
                     retryPolicy.action(new SqlCallable<Boolean>() {
                         @Override
                         public Boolean call(Connection connection) throws SQLException {
-                            createObject(businessContext, connection);
+                            createObject(cloudContext, connection);
                             return true;
                         }
                     });
@@ -339,7 +354,7 @@ public class BusinessServices extends AbstractService {
                     retryPolicy.action(new SqlCallable<Boolean>() {
                         @Override
                         public Boolean call(Connection connection) throws SQLException {
-                            listContainers(businessContext, connection);
+                            listContainers(cloudContext, connection);
                             return true;
                         }
                     });
@@ -349,7 +364,17 @@ public class BusinessServices extends AbstractService {
                     retryPolicy.action(new SqlCallable<Boolean>() {
                         @Override
                         public Boolean call(Connection connection) throws SQLException {
-                            listObjects(businessContext, connection);
+                            listObjects(cloudContext, connection);
+                            return true;
+                        }
+                    });
+                }
+                break;
+                case "OLAP_R3": {
+                    retryPolicy.action(new SqlCallable<Boolean>() {
+                        @Override
+                        public Boolean call(Connection connection) throws SQLException {
+                            calculateMeanObjectSize(cloudContext, connection);
                             return true;
                         }
                     });
@@ -366,7 +391,7 @@ public class BusinessServices extends AbstractService {
 
     @Override
     protected Context createContext() {
-        return new BusinessContext();
+        return new CloudContext();
     }
 
     // U T I L I T I E S

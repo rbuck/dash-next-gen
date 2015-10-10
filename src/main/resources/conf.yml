@@ -11,7 +11,7 @@ DEFAULTS: &defaults
   dash.driver.burst.limit: 800000
   dash.driver.duration: !env $(dash.driver.duration:30)
   dash.driver.threads: !env $(dash.driver.threads:32)
-  dash.driver.class: com.github.rbuck.dash.services.cloud.BusinessServices
+  dash.driver.class: com.github.rbuck.dash.services.cloud.CloudService
   dash.db.name: cloud
   dash.db.schema: cloud
   dash.db.user: dba
@@ -29,10 +29,24 @@ CLOUD_MIX: &cloud
   dash.workload.tag: [OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]
   dash.workload.mix: [10,20,30,20,20]
 
-NUODB_MIX:
+NUODB_OLTP:
   <<: *cloud
   <<: *nuodb
 
-MYSQL_MIX:
+NUODB_OLAP:
+  <<: *defaults
+  <<: *nuodb
+  dash.driver.threads: 1
+  dash.workload.tag: [OLAP_R3]
+  dash.workload.mix: [100]
+
+MYSQL_OLTP:
   <<: *cloud
   <<: *mysql
+
+MYSQL_OLAP:
+  <<: *defaults
+  <<: *mysql
+  dash.driver.threads: 1
+  dash.workload.tag: [OLAP_R3]
+  dash.workload.mix: [100]

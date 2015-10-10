@@ -226,7 +226,7 @@ You can also declare non-single tests, such as the mix defined in MIX_1.
       dash.driver.burst.limit: 800000
       dash.driver.duration: !env $(dash.driver.duration:30)
       dash.driver.threads: !env $(dash.driver.threads:32)
-      dash.driver.class: com.github.rbuck.dash.services.cloud.BusinessServices
+      dash.driver.class: com.github.rbuck.dash.services.cloud.CloudService
       dash.db.name: cloud
       dash.db.schema: cloud
       dash.db.user: dba
