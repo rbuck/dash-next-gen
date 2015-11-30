@@ -13,8 +13,8 @@ public class SqlScriptTest {
         for (String sqlFile : sqlFiles) {
             try {
                 StringBuilder builder = Resources.loadResource(CloudService.class, sqlFile, new StringBuilder());
-                SqlScript splitter = new SqlScript();
-                final List<String> statements = splitter.split(builder.toString());
+                SqlScriptSplitter splitter = new SqlScriptSplitter();
+                final List<String> statements = splitter.splitStatements(builder.toString());
                 System.out.println("done");
             } catch (IOException e) {
                 e.printStackTrace();

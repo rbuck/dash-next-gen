@@ -242,11 +242,7 @@ public class CloudService extends AbstractService {
                 new FixedInterval(1, 100),
                 new DataSourceContext());
 
-        // the sql-splitter has a number of bugs in it
-        // so it won't work for many scenarios...
-        if (dialect.getName().equals("nuodb")) {
-            loadDataModel();
-        }
+        loadDataModel();
 
         // reporting services...
 
@@ -265,8 +261,8 @@ public class CloudService extends AbstractService {
             // n.b. a new sql script splitter that overcomes issues with
             // existing ones online, and deficiencies in those hard-coded
             // to work with only one database technology.
-            SqlScript sqlScript = new SqlScript();
-            final List<String> statements = sqlScript.split(builder.toString());
+            SqlScriptSplitter splitter = new SqlScriptSplitter();
+            final List<String> statements = splitter.splitStatements(builder.toString());
 
             try {
                 retryPolicy.action(

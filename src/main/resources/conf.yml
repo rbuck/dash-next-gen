@@ -1,5 +1,6 @@
 MYSQL: &mysql
   dash.db.host: 172.16.211.146
+  dash.db.port: 3306
   dash.db.type: mysql
 
 NUODB: &nuodb
