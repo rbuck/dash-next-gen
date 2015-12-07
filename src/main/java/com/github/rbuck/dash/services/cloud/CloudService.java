@@ -18,6 +18,7 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.github.rbuck.dash.common.PropertiesHelper.getBooleanProperty;
 import static java.lang.System.getProperties;
 
 /**
@@ -242,7 +243,9 @@ public class CloudService extends AbstractService {
                 new FixedInterval(1, 100),
                 new DataSourceContext());
 
-        loadDataModel();
+        if (getBooleanProperty(properties, "dash.skip.db.init", false)) {
+            loadDataModel();
+        }
 
         // reporting services...
 
