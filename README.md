@@ -284,6 +284,14 @@ terrible for that as one would want multiple data points to distinguish legit
 trends from inconsequential outliers. Or perhaps you want to test with a highly
 concurrent workload (another weakness of JUnit).
 
+Lastly, JUnit itself has no ability to be run in a distributed fashion. Proper
+testing of scale-out databases ought to include the use of scale-out test
+drivers. JUnit was not built for this. Dash on the other hand has been set up
+to be run in a distributed fashion. Using Logstash, Redis, ElasticSearch, and
+Kibana, one can correlate performance and system metrics for a distributed
+system under test and have results charted in real time, a capability demonstrated
+with this framework with several major financial services and telco companies.
+
 All in all, a decision was made to abandon JUnit as the basis for Dash.
 
 ## Dependencies
