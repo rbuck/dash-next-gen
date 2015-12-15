@@ -52,7 +52,7 @@ resource.
 
 ## Building / Packaging
 
-Simply use Maven 3.x:
+Simply use Maven 2.2.1, or 3.x:
 
     $ mvn clean install
 
