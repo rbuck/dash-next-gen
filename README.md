@@ -180,6 +180,7 @@ related to databases that must be configured when running such a test:
 | dash.db.password  | the database password   | dba        | |
 | dash.db.host      | the database host       | localhost  | |
 | dash.db.port      | the database type       | database specific default port | |
+| dash.skip.db.init | whether or not this instance should skip loading the DDL during startup | false | |
 | dash.db.transaction.autocommit | the database transaction default auto-commit setting | true | |
 | dash.db.transaction.readonly  | the database transaction read-only flag | false | |
 | dash.db.transaction.isolation  | the database transaction default isolation level | TRANSACTION_READ_COMMITTED | Any JDBC transaction isolation level supported by the underlying database. |
