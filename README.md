@@ -79,6 +79,9 @@ The command line accepts the following options:
 
 First off, verify your configuration in conf.yml, and noting the test names.
 
+Second, separately create the database before running the demo; the database
+name is specified in the YAML file.
+
 The preferred way to run the application is to run it using the run.sh script.
 Here is an example of running the cloud demo:
 
@@ -180,7 +183,7 @@ related to databases that must be configured when running such a test:
 | dash.db.password  | the database password   | dba        | |
 | dash.db.host      | the database host       | localhost  | |
 | dash.db.port      | the database type       | database specific default port | |
-| dash.skip.db.init | whether or not this instance should skip loading the DDL during startup | false | |
+| dash.db.skip.init | whether or not this instance should skip loading the DDL during startup | false | |
 | dash.db.transaction.autocommit | the database transaction default auto-commit setting | true | |
 | dash.db.transaction.readonly  | the database transaction read-only flag | false | |
 | dash.db.transaction.isolation  | the database transaction default isolation level | TRANSACTION_READ_COMMITTED | Any JDBC transaction isolation level supported by the underlying database. |

@@ -84,8 +84,6 @@ public class Container {
                 service.create();
                 service.start();
                 setStatus(Status.STARTED);
-                // wait till the shutdown condition is signaled...
-                isShutdown.await();
             }
         } finally {
             shutdownLock.unlock();

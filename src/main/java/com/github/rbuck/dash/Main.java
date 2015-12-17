@@ -14,7 +14,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
+import static com.github.rbuck.dash.common.PropertiesHelper.getIntegerProperty;
+import static java.lang.System.getProperties;
 import static java.lang.System.getProperty;
 
 /**
@@ -65,7 +68,10 @@ public class Main {
             // control-c was triggered, or the container itself
             // shutdown, b/c perhaps the test completed.
             try {
-                latch.await();
+                int testDuration = getIntegerProperty(getProperties(), "dash.driver.duration", 30);
+                if (!latch.await(testDuration, TimeUnit.SECONDS)) {
+                    doStop(latch, container);
+                }
             } catch (InterruptedException e) {
                 // ignore
             }

@@ -17,6 +17,7 @@ DEFAULTS: &defaults
   dash.db.schema: cloud
   dash.db.user: dba
   dash.db.password: dba
+  dash.db.skip.init: false
   dash.db.pool.type: hikaricp
   dash.db.transaction.autocommit: true
   dash.db.transaction.readonly: false

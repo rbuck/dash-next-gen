@@ -243,7 +243,7 @@ public class CloudService extends AbstractService {
                 new FixedInterval(1, 100),
                 new DataSourceContext());
 
-        if (getBooleanProperty(properties, "dash.skip.db.init", false)) {
+        if (!getBooleanProperty(properties, "dash.db.skip.init", false)) {
             loadDataModel();
         }
 
