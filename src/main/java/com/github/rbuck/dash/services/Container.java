@@ -187,6 +187,10 @@ public class Container {
         for (Service service : serviceLoader) {
             if (Service.class.isAssignableFrom(service.getClass())) {
                 services.add(service);
+            }
+        }
+        for (Service service : services) {
+            if (className.equals(service.getClass().getName())) {
                 return service;
             }
         }

@@ -1,6 +1,5 @@
 package com.github.rbuck.dash.services.cloud;
 
-import com.codahale.metrics.CsvReporter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.github.rbuck.dash.common.*;
@@ -31,9 +30,6 @@ public class CloudService extends AbstractService {
 
     private final MetricRegistry metricRegistry = new MetricRegistry();
     private final MetricsService metricsService = new MetricsService(metricRegistry);
-
-    private volatile TimerConsoleReporter consoleReporter;
-    private volatile CsvReporter csvReporter;
 
     private SqlRetryPolicy<Boolean> retryPolicy;
     private HashMap<String, Timer> meters;

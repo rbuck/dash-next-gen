@@ -114,7 +114,6 @@ public abstract class AbstractService implements Service {
             System.out.println("[" + now() + "] stopped");
             for (int i = 0; i < getThreadCount(); i++) {
                 threads[i].interrupt();
-                //threads[i].join();
                 threads[i] = null;
             }
         }

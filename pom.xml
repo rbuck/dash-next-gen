@@ -177,11 +177,18 @@
             <artifactId>javassist</artifactId>
             <version>${javassist.version}</version>
         </dependency>
-        <!--
-        jackson-annotations-2.2.3.jar
-jackson-core-2.2.3.jar
-jackson-databind-2.2.3.jar
-        -->
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+            <version>4.5.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
