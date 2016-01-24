@@ -8,6 +8,7 @@ import com.github.rbuck.dash.common.Mix;
 import com.github.rbuck.dash.common.Resources;
 import com.github.rbuck.dash.services.AbstractService;
 import com.github.rbuck.dash.services.Context;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.client.fluent.Response;
 
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.github.rbuck.dash.common.PropertiesHelper.getIntegerProperty;
 import static com.github.rbuck.dash.common.PropertiesHelper.getStringProperty;
@@ -36,6 +38,8 @@ public class WooCommerce extends AbstractService {
 
     private String host;
     private int port;
+
+    private AtomicInteger pages;
 
     public WooCommerce() {
     }
@@ -68,6 +72,7 @@ public class WooCommerce extends AbstractService {
 
         host = getStringProperty(properties, "woocommerce.host", "172.16.228.138");
         port = getIntegerProperty(properties, "woocommerce.port", 8080);
+        pages = new AtomicInteger(getIntegerProperty(properties, "woocommerce.pages", 3));
 
         // reporting services...
 
@@ -116,20 +121,39 @@ public class WooCommerce extends AbstractService {
                     String term = searchTerms[random.nextInt(searchTerms.length)];
                     Response response = Request.Get("http://" + host + ":" + port + "/?s=" + term)
                             .execute();
-                    if ((response.returnResponse().getStatusLine().getStatusCode() != 200)) {
-                        System.err.println(response.returnResponse().getStatusLine());
+                    HttpResponse httpResponse = response.returnResponse();
+                    if ((httpResponse.getStatusLine().getStatusCode() != 200)) {
+                        System.err.println("[WOO_FIND]" + httpResponse.getStatusLine());
                     }
                 }
                 break;
-                case "WOO_NEXT": {
+                case "WOO_PNXT": {
                     // implements going to the next page of results where page
                     // numbers range from 1..3.
                     Random random = new Random(31);
-                    int page = random.nextInt(3) + 1;
+                    int page = random.nextInt(pages.get()) + 1;
                     Response response = Request.Get("http://" + host + ":" + port + "/shop/page/" + page + "/")
                             .execute();
-                    if ((response.returnResponse().getStatusLine().getStatusCode() != 200)) {
-                        System.err.println(response.returnResponse().getStatusLine());
+                    HttpResponse httpResponse = response.returnResponse();
+                    if ((httpResponse.getStatusLine().getStatusCode() != 200)) {
+                        System.err.println("[WOO_PNXT]" + "(" + pages + "): " + httpResponse.getStatusLine());
+                    }
+                }
+                break;
+                case "WOO_PLIM": {
+                    // implements going to the next page of results where page
+                    // numbers range from 1..3.
+                    Random random = new Random(31);
+                    int expected = random.nextInt() + 2;
+                    Response response = Request.Get("http://" + host + ":" + port + "/shop/page/" + (expected + 1) + "/")
+                            .execute();
+                    HttpResponse httpResponse = response.returnResponse();
+                    if ((httpResponse.getStatusLine().getStatusCode() == 200)) {
+                        pages.compareAndSet(expected, expected + 1);
+                    } else {
+                        if (httpResponse.getStatusLine().getStatusCode() != 404) {
+                            System.err.println("[WOO_PLIM]" + httpResponse.getStatusLine());
+                        }
                     }
                 }
                 break;

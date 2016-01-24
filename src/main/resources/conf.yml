@@ -61,7 +61,8 @@ WOOCOMMERCE:
   dash.driver.class: com.github.rbuck.dash.services.woocommerce.WooCommerce
   dash.metrics.service.reporters: [csv,console]
   dash.metrics.service.elasticsearch.hosts: ['localhost:9200']
-  dash.workload.tag: [WOO_NEXT, WOO_FIND]
-  dash.workload.mix: [50,50]
+  dash.workload.tag: [WOO_FIND, WOO_PNXT, WOO_PLIM]
+  dash.workload.mix: [50,49,1]
   woocommerce.host: 172.16.228.138
   woocommerce.port: 8080
+  woocommerce.pages: 3

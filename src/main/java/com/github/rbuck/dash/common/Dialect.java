@@ -3,7 +3,6 @@ package com.github.rbuck.dash.common;
 import java.io.IOException;
 import java.util.Properties;
 
-import static com.github.rbuck.dash.common.Resources.loadResource;
 import static java.lang.System.getProperties;
 
 /**
