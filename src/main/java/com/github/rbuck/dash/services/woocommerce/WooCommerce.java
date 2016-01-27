@@ -38,6 +38,7 @@ public class WooCommerce extends AbstractService {
 
     private String host;
     private int port;
+    private int tenants;
 
     private AtomicInteger pages;
 
@@ -72,6 +73,7 @@ public class WooCommerce extends AbstractService {
 
         host = getStringProperty(properties, "woocommerce.host", "172.16.228.138");
         port = getIntegerProperty(properties, "woocommerce.port", 8080);
+        tenants = getIntegerProperty(properties, "woocommerce.tenants", 1);
         pages = new AtomicInteger(getIntegerProperty(properties, "woocommerce.pages", 3));
 
         // reporting services...
@@ -119,7 +121,7 @@ public class WooCommerce extends AbstractService {
                             "Premium", "Quality", "Silhouette"};
                     Random random = new Random(31);
                     String term = searchTerms[random.nextInt(searchTerms.length)];
-                    Response response = Request.Get("http://" + host + ":" + port + "/?s=" + term)
+                    Response response = Request.Get("http://" + host + ":" + getRandomTenant() + "/?s=" + term)
                             .execute();
                     HttpResponse httpResponse = response.returnResponse();
                     if ((httpResponse.getStatusLine().getStatusCode() != 200)) {
@@ -132,7 +134,7 @@ public class WooCommerce extends AbstractService {
                     // numbers range from 1..3.
                     Random random = new Random(31);
                     int page = random.nextInt(pages.get()) + 1;
-                    Response response = Request.Get("http://" + host + ":" + port + "/shop/page/" + page + "/")
+                    Response response = Request.Get("http://" + host + ":" + getRandomTenant() + "/shop/page/" + page + "/")
                             .execute();
                     HttpResponse httpResponse = response.returnResponse();
                     if ((httpResponse.getStatusLine().getStatusCode() != 200)) {
@@ -145,7 +147,7 @@ public class WooCommerce extends AbstractService {
                     // numbers range from 1..3.
                     Random random = new Random(31);
                     int expected = random.nextInt() + 2;
-                    Response response = Request.Get("http://" + host + ":" + port + "/shop/page/" + (expected + 1) + "/")
+                    Response response = Request.Get("http://" + host + ":" + getRandomTenant() + "/shop/page/" + (expected + 1) + "/")
                             .execute();
                     HttpResponse httpResponse = response.returnResponse();
                     if ((httpResponse.getStatusLine().getStatusCode() == 200)) {
@@ -179,5 +181,10 @@ public class WooCommerce extends AbstractService {
 
     protected int getThreadCount() {
         return super.getThreadCount();
+    }
+
+    private int getRandomTenant() {
+        Random random = new Random(31);
+        return port + random.nextInt(tenants);
     }
 }

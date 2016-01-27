@@ -53,7 +53,7 @@ MYSQL_OLAP:
   dash.workload.tag: [OLAP_R3]
   dash.workload.mix: [100]
 
-WOOCOMMERCE:
+WOOCOM_DEFAULTS: &woocom_defaults
   dash.driver.rates.limit: 500000
   dash.driver.burst.limit: 800000
   dash.driver.duration: !env $(dash.driver.duration:30)
@@ -61,8 +61,18 @@ WOOCOMMERCE:
   dash.driver.class: com.github.rbuck.dash.services.woocommerce.WooCommerce
   dash.metrics.service.reporters: [csv,console]
   dash.metrics.service.elasticsearch.hosts: ['localhost:9200']
-  dash.workload.tag: [WOO_FIND, WOO_PNXT, WOO_PLIM]
-  dash.workload.mix: [50,49,1]
   woocommerce.host: 172.16.228.138
   woocommerce.port: 8080
   woocommerce.pages: 3
+
+WOOCOM_VPS:
+  <<: *woocom_defaults
+  dash.workload.tag: [WOO_FIND, WOO_PNXT, WOO_PLIM]
+  dash.workload.mix: [50,49,1]
+  woocommerce.tenants: 1
+
+WOOCOM_MTS:
+  <<: *woocom_defaults
+  dash.workload.tag: [WOO_FIND, WOO_PNXT]
+  dash.workload.mix: [50,50]
+  woocommerce.tenants: 1
