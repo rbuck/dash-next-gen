@@ -63,6 +63,9 @@ WOOCOM_DEFAULTS: &woocom_defaults
   dash.metrics.service.elasticsearch.hosts: ['localhost:9200']
   woocommerce.host: 172.16.228.138
   woocommerce.port: 8080
+  # an example of how to make it work with name based virtual hosts and dnsmasq
+  # woocommerce.host: 't%d.dev'
+  # woocommerce.scheme.namebased: true
   woocommerce.pages: 3
 
 WOOCOM_VPS:

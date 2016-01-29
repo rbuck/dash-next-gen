@@ -18,8 +18,8 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.github.rbuck.dash.common.PropertiesHelper.getIntegerProperty;
-import static com.github.rbuck.dash.common.PropertiesHelper.getStringProperty;
+import static com.github.rbuck.dash.common.PropertiesHelper.*;
+import static java.lang.String.format;
 import static java.lang.System.getProperties;
 
 /**
@@ -40,7 +40,10 @@ public class WooCommerce extends AbstractService {
     private int port;
     private int tenants;
 
+    private Random random = new Random(31);
+
     private AtomicInteger pages;
+    private boolean isNameBased;
 
     public WooCommerce() {
     }
@@ -71,10 +74,12 @@ public class WooCommerce extends AbstractService {
 
         // operational state...
 
+        // name | addr | port
         host = getStringProperty(properties, "woocommerce.host", "172.16.228.138");
         port = getIntegerProperty(properties, "woocommerce.port", 8080);
         tenants = getIntegerProperty(properties, "woocommerce.tenants", 1);
         pages = new AtomicInteger(getIntegerProperty(properties, "woocommerce.pages", 3));
+        isNameBased = getBooleanProperty(properties, "woocommerce.scheme.namebased", false);
 
         // reporting services...
 
@@ -121,7 +126,7 @@ public class WooCommerce extends AbstractService {
                             "Premium", "Quality", "Silhouette"};
                     Random random = new Random(31);
                     String term = searchTerms[random.nextInt(searchTerms.length)];
-                    Response response = Request.Get("http://" + host + ":" + getRandomTenant() + "/?s=" + term)
+                    Response response = Request.Get("http://" + getRandomHost() + ":" + getRandomPort() + "/?s=" + term)
                             .execute();
                     HttpResponse httpResponse = response.returnResponse();
                     if ((httpResponse.getStatusLine().getStatusCode() != 200)) {
@@ -134,7 +139,7 @@ public class WooCommerce extends AbstractService {
                     // numbers range from 1..3.
                     Random random = new Random(31);
                     int page = random.nextInt(pages.get()) + 1;
-                    Response response = Request.Get("http://" + host + ":" + getRandomTenant() + "/shop/page/" + page + "/")
+                    Response response = Request.Get("http://" + getRandomHost() + ":" + getRandomPort() + "/?post_type=product&paged=" + page)
                             .execute();
                     HttpResponse httpResponse = response.returnResponse();
                     if ((httpResponse.getStatusLine().getStatusCode() != 200)) {
@@ -147,7 +152,7 @@ public class WooCommerce extends AbstractService {
                     // numbers range from 1..3.
                     Random random = new Random(31);
                     int expected = random.nextInt() + 2;
-                    Response response = Request.Get("http://" + host + ":" + getRandomTenant() + "/shop/page/" + (expected + 1) + "/")
+                    Response response = Request.Get("http://" + getRandomHost() + ":" + getRandomPort() + "/?post_type=product&paged=" + (expected + 1))
                             .execute();
                     HttpResponse httpResponse = response.returnResponse();
                     if ((httpResponse.getStatusLine().getStatusCode() == 200)) {
@@ -183,8 +188,19 @@ public class WooCommerce extends AbstractService {
         return super.getThreadCount();
     }
 
-    private int getRandomTenant() {
-        Random random = new Random(31);
-        return port + random.nextInt(tenants);
+    private String getRandomHost() {
+        String value = host;
+        if (isNameBased) {
+            value = format(host, random.nextInt(tenants) + 1);
+        }
+        return value;
+    }
+
+    private int getRandomPort() {
+        int value = port;
+        if (!isNameBased) {
+            value = port + random.nextInt(tenants);
+        }
+        return value;
     }
 }
