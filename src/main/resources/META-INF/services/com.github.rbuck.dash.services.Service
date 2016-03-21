@@ -1,2 +1,3 @@
 com.github.rbuck.dash.services.cloud.CloudService
 com.github.rbuck.dash.services.woocommerce.WooCommerce
+com.github.rbuck.dash.services.insert.InsertBench

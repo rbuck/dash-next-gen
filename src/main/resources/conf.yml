@@ -79,3 +79,13 @@ WOOCOM_MTS:
   dash.workload.tag: [WOO_FIND, WOO_PNXT]
   dash.workload.mix: [50,50]
   woocommerce.tenants: 1
+
+MYSQL_INSERT:
+  <<: *defaults
+  <<: *mysql
+  dash.db.name: demo
+  dash.db.schema: demo
+  dash.driver.class: com.github.rbuck.dash.services.insert.InsertBench
+  dash.workload.tag: [INSERT]
+  dash.workload.mix: [100]
+  dash.driver.record.limit: 100000000
