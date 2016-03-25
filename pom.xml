@@ -4,7 +4,7 @@
 
     <groupId>com.github.rbuck.dash</groupId>
     <artifactId>dash</artifactId>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.8-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>dash</name>
@@ -32,6 +32,7 @@
         <mysql.version>5.1.36</mysql.version>
         <junit.version>4.12</junit.version>
         <javassist.version>3.18.2-GA</javassist.version>
+        <jackson.version>2.6.5</jackson.version>
     </properties>
 
     <repositories>
@@ -188,7 +189,26 @@
             <artifactId>fluent-hc</artifactId>
             <version>4.5.1</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-afterburner</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
