@@ -11,10 +11,8 @@ import org.elasticsearch.metrics.percolation.Notifier;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.net.*;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static com.github.rbuck.dash.common.PropertiesHelper.getStringArrayProperty;
@@ -64,12 +62,18 @@ public class MetricsService implements Closeable {
         if (reporterNames.contains("elasticsearch")) {
             try {
                 final String[] defaultHosts = {"localhost:9200"};
+                final String[] elasticHosts = getStringArrayProperty(System.getProperties(),
+                        "dash.metrics.service.elasticsearch.hosts", defaultHosts);
+                final String bindAddress = getBindAddress(elasticHosts);
+                Map<String, Object> additionalFields = new LinkedHashMap<>();
+                additionalFields.put("host", bindAddress);
                 final ElasticsearchReporter reporter = ElasticsearchReporter.forRegistry(metricRegistry)
-                        .hosts(getStringArrayProperty(System.getProperties(), "dash.metrics.service.elasticsearch.hosts", defaultHosts))
+                        .hosts(elasticHosts)
                         .index("dash-metrics")
                         .indexDateFormat("yyyy-MM-dd")
                         .percolationFilter(MetricFilter.ALL)
                         .percolationNotifier(new SystemOutNotifier())
+                        .additionalFields(additionalFields)
                         .build();
                 reporters.add(reporter);
             } catch (IOException e) {
@@ -89,5 +93,25 @@ public class MetricsService implements Closeable {
         for (ScheduledReporter reporter : reporters) {
             reporter.close();
         }
+    }
+
+    private String getBindAddress(String[] addresses) {
+        String nodeId = null;
+        for (String address : addresses) {
+            try {
+                URI uri = new URI("tcp://" + address);
+                SocketAddress sockaddr = new InetSocketAddress(uri.getHost(), uri.getPort());
+                try (Socket s = new Socket()) {
+                    s.connect(sockaddr, 1000);
+                    nodeId = s.getLocalAddress().getHostAddress();
+                    break;
+                } catch (IOException e) {
+                    // ignore
+                }
+            } catch (URISyntaxException e) {
+                throw new Error("Elasticsearch bind address is not valid: " + address, e);
+            }
+        }
+        return nodeId;
     }
 }
