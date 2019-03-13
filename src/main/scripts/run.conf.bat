@@ -4,7 +4,7 @@ if not "x%JAVA_OPTS%" == "x" (
   goto JAVA_OPTS_SET
 )
 
-set "JAVA_OPTS=-Xms64M -Xmx512M -XX:MaxPermSize=256M"
+set "JAVA_OPTS=-Xms64M -Xmx512M"
 
 set "JAVA_OPTS=%JAVA_OPTS% -Djava.net.preferIPv4Stack=true"
 

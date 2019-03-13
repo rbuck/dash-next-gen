@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 DEBUG_MODE=false
 DEBUG_PORT="8787"
