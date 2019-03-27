@@ -127,7 +127,7 @@ public abstract class AbstractService implements Service {
             try {
                 threadLatch.await();
             } catch (InterruptedException e) {
-                Thread.interrupted();
+                Thread.currentThread().interrupt();
             }
         }
     }

@@ -4,10 +4,12 @@ import com.github.rbuck.dash.common.Exceptions;
 import com.github.rbuck.dash.common.YamlEnv;
 import com.github.rbuck.dash.services.Container;
 import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.helper.HelpScreenException;
 import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.github.rbuck.dash.common.PropertiesHelper.getIntegerProperty;
 import static java.lang.System.getProperties;
@@ -24,6 +28,12 @@ import static java.lang.System.getProperty;
  * Server application main that configures and runs the dash demo.
  */
 public class Main {
+
+    static {
+        SLF4JBridgeHandler.removeHandlersForRootLogger();
+        SLF4JBridgeHandler.install();
+        Logger.getLogger("").setLevel(Level.FINEST);
+    }
 
     private static void panic(String message, Throwable e) {
         System.err.println(message);
@@ -40,24 +50,18 @@ public class Main {
 
         final CountDownLatch latch = new CountDownLatch(1);
         final Container container = new Container();
-        container.addStatusChangeListener(new Container.StatusChangeListener() {
-            @Override
-            public void onChange(Container.StatusChangeEvent changeEvent) {
-                // if an event occurs that causes the container to shut itself
-                // down, also shut down the application. An event could be a
-                // failure of some sort, or it could be that the job completed.
-                if (Container.Status.STOPPED == changeEvent.getStatus()) {
-                    doStop(latch, container);
-                }
-            }
-        });
-        Thread shutdownThread = new Thread() {
-            @Override
-            public void run() {
-                // if a control-c occurs, properly halt the container.
+        container.addStatusChangeListener(changeEvent -> {
+            // if an event occurs that causes the container to shut itself
+            // down, also shut down the application. An event could be a
+            // failure of some sort, or it could be that the job completed.
+            if (Container.Status.STOPPED == changeEvent.getStatus()) {
                 doStop(latch, container);
             }
-        };
+        });
+        Thread shutdownThread = new Thread(() -> {
+            // if a control-c occurs, properly halt the container.
+            doStop(latch, container);
+        });
         // add a control-c hook that stops the container cleanly...
         Runtime.getRuntime().addShutdownHook(shutdownThread);
 
@@ -92,10 +96,14 @@ public class Main {
         final String defaultConfDir = getProperty("dash.application.conf.dir");
         final String defaultConfFile = (defaultConfDir != null ? defaultConfDir + File.separatorChar : "") + "conf.yml";
 
-        ArgumentParser parser = ArgumentParsers.newArgumentParser("Dash", true)
+        ArgumentParser parser = ArgumentParsers.newFor("prog").addHelp(false).build()
                 .description("Runs a performance test mix.")
                 .version("${prog} " + Version.id())
                 .epilog("Dash is a free software under Apache License Version 2.0");
+
+        parser.addArgument("-h", "--help")
+                .help("show this help message and exit")
+                .action(Arguments.help());
 
         parser.addArgument("-c", "--conf")
                 .help("the config file containing the test specification to run (default: ../conf/conf.yml")
@@ -135,11 +143,13 @@ public class Main {
                 }
             }
 
+        } catch (HelpScreenException e) {
+            System.exit(0);
         } catch (ArgumentParserException e) {
             parser.handleError(e);
+            System.exit(0);
         } catch (IOException e) {
-            e.printStackTrace();
+            // ignore
         }
-
     }
 }

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+# Copyright (c) 2018-2019, NuoDB, Inc.
+# All rights reserved.
+#
+# Redistribution and use permitted under the terms of the 3-clause BSD license.
+
+: ${IMG_NAME:="nuodb/nuodb-ce:latest"}
+
+cat <<EOF
+To connect to the database:
+
+    nuosql --user dba --password dba test@ad1
+
+To show domain status:
+
+    nuocmd --api-server https://ad1:8888 show domain
+
+EOF
+
+docker run -it --name term --rm \
+    --net nuodb-net ${IMG_NAME} bash

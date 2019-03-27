@@ -18,7 +18,7 @@
         <property name="readOnly" value="${dash.db.transaction.readonly:false}"/>
         <property name="connectionTestQuery" value="${dash.db.connection.test.string}"/>
         <property name="maximumPoolSize" value="${maxPoolSize:100}"/>
-        <property name="maxLifetime" value="${maxLifetimeMs:120000}"/>
+        <property name="idleTimeout" value="${maxLifetimeMs:120000}"/>
         <property name="isolateInternalQueries" value="true"/>
         <property name="transactionIsolation" value="${dash.db.transaction.isolation:TRANSACTION_READ_COMMITTED}"/>
     </bean>

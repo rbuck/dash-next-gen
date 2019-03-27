@@ -6,7 +6,6 @@ import com.github.rbuck.dash.common.*;
 import com.github.rbuck.dash.services.AbstractService;
 import com.github.rbuck.dash.services.Context;
 import com.github.rbuck.retry.FixedInterval;
-import com.github.rbuck.retry.SqlCallable;
 import com.github.rbuck.retry.SqlRetryPolicy;
 
 import java.io.IOException;
@@ -265,16 +264,13 @@ public class CloudService extends AbstractService {
 
             try {
                 retryPolicy.action(
-                        new SqlCallable<Boolean>() {
-                            @Override
-                            public Boolean call(Connection connection) throws SQLException {
-                                for (String sql : statements) {
-                                    try (Statement statement = connection.createStatement()) {
-                                        statement.execute(sql);
-                                    }
+                        connection -> {
+                            for (String sql : statements) {
+                                try (Statement statement = connection.createStatement()) {
+                                    statement.execute(sql);
                                 }
-                                return true;
                             }
+                            return true;
                         }
                 );
             } catch (Exception e) {
@@ -316,62 +312,44 @@ public class CloudService extends AbstractService {
         try (Timer.Context ignore = timer.time()) {
             switch (type.getTag()) {
                 case "OLTP_C1": {
-                    retryPolicy.action(new SqlCallable<Boolean>() {
-                        @Override
-                        public Boolean call(Connection connection) throws SQLException {
-                            createAccount(cloudContext, connection);
-                            return true;
-                        }
+                    retryPolicy.action(connection -> {
+                        createAccount(cloudContext, connection);
+                        return true;
                     });
                 }
                 break;
                 case "OLTP_C2": {
-                    retryPolicy.action(new SqlCallable<Boolean>() {
-                        @Override
-                        public Boolean call(Connection connection) throws SQLException {
-                            createContainer(cloudContext, connection);
-                            return true;
-                        }
+                    retryPolicy.action(connection -> {
+                        createContainer(cloudContext, connection);
+                        return true;
                     });
                 }
                 break;
                 case "OLTP_C3": {
-                    retryPolicy.action(new SqlCallable<Boolean>() {
-                        @Override
-                        public Boolean call(Connection connection) throws SQLException {
-                            createObject(cloudContext, connection);
-                            return true;
-                        }
+                    retryPolicy.action(connection -> {
+                        createObject(cloudContext, connection);
+                        return true;
                     });
                 }
                 break;
                 case "OLTP_R2": {
-                    retryPolicy.action(new SqlCallable<Boolean>() {
-                        @Override
-                        public Boolean call(Connection connection) throws SQLException {
-                            listContainers(cloudContext, connection);
-                            return true;
-                        }
+                    retryPolicy.action(connection -> {
+                        listContainers(cloudContext, connection);
+                        return true;
                     });
                 }
                 break;
                 case "OLTP_R3": {
-                    retryPolicy.action(new SqlCallable<Boolean>() {
-                        @Override
-                        public Boolean call(Connection connection) throws SQLException {
-                            listObjects(cloudContext, connection);
-                            return true;
-                        }
+                    retryPolicy.action(connection -> {
+                        listObjects(cloudContext, connection);
+                        return true;
                     });
                 }
                 break;
                 case "OLAP_R3": {
-                    retryPolicy.action(new SqlCallable<Boolean>() {
-                        @Override
-                        public Boolean call(Connection connection) throws SQLException {
-                            calculateMeanObjectSize(cloudContext, connection);
-                            return true;
-                        }
+                    retryPolicy.action(connection -> {
+                        calculateMeanObjectSize(cloudContext, connection);
+                        return true;
                     });
                 }
                 break;

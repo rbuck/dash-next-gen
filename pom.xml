@@ -4,7 +4,7 @@
 
   <groupId>com.github.rbuck.dash</groupId>
   <artifactId>dash</artifactId>
-  <version>1.10-SNAPSHOT</version>
+  <version>1.11</version>
   <packaging>jar</packaging>
 
   <name>dash</name>
@@ -18,12 +18,12 @@
     <argparse4j.version>0.8.1</argparse4j.version>
     <bonecp.version>0.8.0.RELEASE</bonecp.version>
     <commons.logging.version>1.2</commons.logging.version>
-    <hikaricp.version>2.3.13</hikaricp.version>
     <guava.version>27.1-jre</guava.version>
+    <hikaricp.version>2.3.13</hikaricp.version>
     <hsqldb.version>2.4.1</hsqldb.version>
     <httpcomponents.version>4.5.7</httpcomponents.version>
-    <java.retry.version>1.2</java.retry.version>
     <jackson.version>2.9.8</jackson.version>
+    <java.retry.version>1.2</java.retry.version>
     <javassist.version>3.24.1-GA</javassist.version>
     <junit.version>4.12</junit.version>
     <logback.version>1.2.3</logback.version>
@@ -32,6 +32,7 @@
     <metrics.version>4.0.5</metrics.version>
     <mysql.version>8.0.15</mysql.version>
     <nuodb.version>20.0.0</nuodb.version>
+    <oracle.jdbc.version>12.2.0.1</oracle.jdbc.version>
     <postgresql.version>42.2.5</postgresql.version>
     <slf4j.version>1.7.26</slf4j.version>
     <snakeyaml.version>1.24</snakeyaml.version>
@@ -66,6 +67,11 @@
       <artifactId>postgresql</artifactId>
       <version>${postgresql.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.oracle</groupId>
+      <artifactId>ojdbc8</artifactId>
+      <version>${oracle.jdbc.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>io.dropwizard.metrics</groupId>
@@ -80,6 +86,11 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
     <dependency>

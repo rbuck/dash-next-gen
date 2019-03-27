@@ -89,3 +89,22 @@ MYSQL_INSERT:
   dash.workload.tag: [INSERT]
   dash.workload.mix: [100]
   dash.driver.record.limit: 100000000
+
+ORACLE: &oracle
+  dash.db.host: 168.62.53.159
+  dash.db.port: 1521
+  dash.db.type: oracle
+  dash.db.transaction.autocommit: false
+
+# https://yaml.org/spec/1.2/spec.html
+# https://yaml.org/type/merge.html
+ORACLE_PING:
+  <<: *oracle
+  <<: *defaults
+  dash.db.transaction.autocommit: false
+  dash.driver.class: com.github.rbuck.dash.services.ping.PingService
+  dash.db.name: demodb
+  dash.db.user: AAP_OWNER
+  dash.db.password: secret
+  dash.workload.tag: [PING]
+  dash.workload.mix: [100]

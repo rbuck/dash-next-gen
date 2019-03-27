@@ -83,9 +83,7 @@ if [ "x${JAVA_HOME}" = "x" ]; then
     os_type=`uname -s`
     case $os_type in
         Darwin*)
-            #export JAVA_HOME=`/usr/libexec/java_home -v 1.6`
-            export JAVA_HOME=`/usr/libexec/java_home -v 1.7`
-            #export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
+            export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
         ;;
         Linux*)
             export JAVA_HOME=$(readlink -f /usr/bin/java | sed "s:bin/java::")

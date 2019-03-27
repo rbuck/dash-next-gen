@@ -25,8 +25,9 @@ public class SqlScriptSplitter {
         int state = STATE_SQL;
         int statement_state = STATEMENT_GENERIC;
 
-        String token = "", atom = "",
-                sqlStatement = "";
+        String token = "";
+        StringBuilder atom = new StringBuilder();
+        String sqlStatement = "";
         String current_delimiter = ";";
 
         List<String> ret = new ArrayList<>();
@@ -36,7 +37,7 @@ public class SqlScriptSplitter {
 
         for (int i = 0; i < sql.length(); i++) {
             char ch = sql.charAt(i);
-            atom += ch;
+            atom.append(ch);
 
             // if previous the character the end of comment switch state back to SQL
             if (state == STATE_MULTI_LINE_COMMENT_END) {
@@ -124,7 +125,7 @@ public class SqlScriptSplitter {
                     && (Character.isWhitespace(ch) || token.endsWith(current_delimiter))) {
                 statement_state = getStateFromToken(token, statement_state);
                 token = "";
-                atom = "";
+                atom = new StringBuilder();
             }
 
         }// end for

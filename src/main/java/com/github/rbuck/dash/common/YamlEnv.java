@@ -46,10 +46,10 @@ public class YamlEnv {
 
             @Override
             public Object construct(Node node) {
-                if (node == null || !(node instanceof ScalarNode)) {
+                if (!(node instanceof ScalarNode)) {
                     throw new IllegalArgumentException("Node not Scalar Node");
                 }
-                String val = (String) constructScalar((ScalarNode) node);
+                String val = constructScalar((ScalarNode) node);
                 val = val.substring(2, val.length() - 1);
                 String[] terms = val.split(":");
                 assert terms.length <= 2;

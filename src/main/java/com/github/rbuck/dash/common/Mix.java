@@ -100,12 +100,11 @@ public class Mix implements Iterable<Mix.Type> {
                 break;
             }
         }
-        assert result != null;
         return result;
     }
 
     public Type getType(int ordinal) {
-        if (ordinal < 0 && ordinal >= types.length) {
+        if (ordinal < 0 || ordinal >= types.length) {
             throw new IllegalArgumentException("Illegal mix ordinal: " + ordinal);
         }
         return types[ordinal];
