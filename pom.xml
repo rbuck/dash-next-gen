@@ -89,6 +89,11 @@
       <version>${slf4j.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.github.vincentrussell</groupId>
+      <artifactId>json-data-generator</artifactId>
+      <version>1.9</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jul-to-slf4j</artifactId>
       <version>${slf4j.version}</version>

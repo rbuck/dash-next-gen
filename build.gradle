@@ -1,0 +1,63 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    maven {
+        url "file:repo"
+    }
+    mavenCentral()
+}
+
+dependencies {
+    compile 'com.nuodb.jdbc:nuodb-jdbc:20.0.0'
+    compile 'org.postgresql:postgresql:42.2.5'
+    compile 'com.oracle:ojdbc8:12.2.0.1'
+    compile 'io.dropwizard.metrics:metrics-core:4.0.5'
+    compile 'org.yaml:snakeyaml:1.24'
+    compile 'org.slf4j:slf4j-api:1.7.26'
+    compile 'com.github.vincentrussell:json-data-generator:1.9'
+    compile 'org.slf4j:jul-to-slf4j:1.7.26'
+    compile 'ch.qos.logback:logback-classic:1.2.3'
+    compile 'ch.qos.logback:logback-core:1.2.3'
+    compile 'org.isomorphism:token-bucket:1.7'
+    compile 'net.sourceforge.argparse4j:argparse4j:0.8.1'
+    compile 'org.slf4j:jcl-over-slf4j:1.7.26'
+    compile 'com.zaxxer:HikariCP-java6:2.3.13'
+    compile 'org.hsqldb:hsqldb:2.4.1'
+    compile 'com.jolbox:bonecp:0.8.0.RELEASE'
+    compile 'org.springframework:spring-context:5.1.5.RELEASE'
+    compile 'org.springframework:spring-expression:5.1.5.RELEASE'
+    compile 'org.springframework:spring-aop:5.1.5.RELEASE'
+    compile 'org.springframework:spring-beans:5.1.5.RELEASE'
+    compile 'org.springframework:spring-core:5.1.5.RELEASE'
+    compile 'com.github.rbuck:java-retry:1.2'
+    compile 'org.elasticsearch:metrics-elasticsearch-reporter:2.2.0'
+    compile 'com.google.guava:guava:27.1-jre'
+    compile 'aopalliance:aopalliance:1.0'
+    compile 'commons-logging:commons-logging:1.2'
+    compile 'mysql:mysql-connector-java:8.0.15'
+    compile 'org.javassist:javassist:3.24.1-GA'
+    compile 'org.apache.httpcomponents:httpclient:4.5.7'
+    compile 'org.apache.httpcomponents:fluent-hc:4.5.7'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.9.8'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.9.8'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
+    compile 'com.fasterxml.jackson.module:jackson-module-afterburner:2.9.8'
+    testCompile 'junit:junit:4.12'
+}
+
+group = 'com.github.rbuck.dash'
+version = '1.11.0'
+description = 'dash'
+sourceCompatibility = '1.8'
+
+jar {
+    manifest {
+        attributes('Main-Class': 'com.github.rbuck.dash.Main')
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
