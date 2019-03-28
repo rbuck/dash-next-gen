@@ -48,8 +48,12 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
+import groovy.json.JsonSlurper
+def packageSlurper = new JsonSlurper()
+def packageJson = packageSlurper.parse file('package.json')
+version = packageJson.version
+
 group = 'com.github.rbuck.dash'
-version = '1.11.0'
 description = 'dash'
 sourceCompatibility = '1.8'
 
@@ -59,6 +63,7 @@ tasks.withType(JavaCompile) {
 
 tasks.withType(Tar){
   compression = Compression.GZIP
+  extension = 'tar.gz'
 }
 
 jar {
