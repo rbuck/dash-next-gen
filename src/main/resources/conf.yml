@@ -68,7 +68,7 @@ ORCL_PING:
 
 ORCL_Q1:
   <<: *oq_common
-  dash.workload.tag: [QUERY3]
+  dash.workload.tag: [QUERY1]
 
 ORCL_Q2:
   <<: *oq_common
