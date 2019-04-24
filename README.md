@@ -1,5 +1,25 @@
 # Dash (NG)
 
+## Autobahn TL;DR
+
+Use `docker save` and `docker load` to transfer the image to the Oracle host.
+Then run:
+
+```bash
+$ docker run nuodb/autobahn-dash:latest -t ORCL_Q1
+[2019-04-24T19:08:54.870] created
+[2019-04-24T19:08:58.471] started
+Name        Count       Rate        Min      Max      Mean     Std Dev  Median   75%      95%      98%      99%      99.9%     
+QUERY1      373         73          48.69    4391.73  381.02   851.38   65.78    125.15   2907.40  3505.18  3861.16  4391.73  
+QUERY1      1908        189         48.69    4391.73  149.16   373.93   76.31    97.11    351.30   844.69   2602.79  4039.41  
+QUERY1      3352        222         52.42    4391.73  130.73   305.58   85.19    105.69   212.75   574.27   1259.21  3784.49  
+QUERY1      3983        198         52.80    4391.73  162.05   362.07   88.54    110.99   452.18   1595.13  2333.94  3784.49  
+QUERY1      5300        211         53.14    4391.73  145.84   304.92   93.92    115.59   222.59   1058.87  1998.32  3784.49  
+QUERY1      5940        197         53.14    4391.73  172.03   349.21   96.00    119.16   522.81   1595.79  1750.74  3784.49  
+[2019-04-24T19:09:28.494] stopped
+[2019-04-24T19:09:28.497] destroyed
+```
+
 ## Description
 
 Dash is a performance test framework geared towards benchmarking realistic
