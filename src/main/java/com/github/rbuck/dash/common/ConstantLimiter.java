@@ -9,8 +9,8 @@ import static java.lang.System.getProperties;
 
 public class ConstantLimiter implements Limiter {
 
-    protected static final String MIX_RATES_LIMIT = "dash.driver.rates.limit";
-    protected static final String MIX_RATES_BURST = "dash.driver.rates.burst";
+    private static final String MIX_RATES_LIMIT = "dash.driver.rates.limit";
+    private static final String MIX_RATES_BURST = "dash.driver.rates.burst";
 
     private final TokenBucket tokenBucket;
 
@@ -22,11 +22,11 @@ public class ConstantLimiter implements Limiter {
         tokenBucket = builder.build();
     }
 
-    public long getLimitRate() {
+    private long getLimitRate() {
         return PropertiesHelper.getLongProperty(getProperties(), MIX_RATES_LIMIT, 2000);
     }
 
-    public long getBurstRate() {
+    private long getBurstRate() {
         return PropertiesHelper.getLongProperty(getProperties(), MIX_RATES_BURST, getLimitRate());
     }
 

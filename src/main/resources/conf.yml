@@ -31,65 +31,6 @@ CLOUD_MIX: &cloud
   dash.workload.tag: [OLTP_C1,OLTP_C2,OLTP_C3,OLTP_R2,OLTP_R3]
   dash.workload.mix: [10,20,30,20,20]
 
-NUODB_OLTP:
-  <<: *cloud
-  <<: *nuodb
-
-NUODB_OLAP:
-  <<: *defaults
-  <<: *nuodb
-  dash.driver.threads: 1
-  dash.workload.tag: [OLAP_R3]
-  dash.workload.mix: [100]
-
-MYSQL_OLTP:
-  <<: *cloud
-  <<: *mysql
-
-MYSQL_OLAP:
-  <<: *defaults
-  <<: *mysql
-  dash.driver.threads: 1
-  dash.workload.tag: [OLAP_R3]
-  dash.workload.mix: [100]
-
-WOOCOM_DEFAULTS: &woocom_defaults
-  dash.driver.rates.limit: 500000
-  dash.driver.burst.limit: 800000
-  dash.driver.duration: !env $(dash.driver.duration:30)
-  dash.driver.threads: !env $(dash.driver.threads:32)
-  dash.driver.class: com.github.rbuck.dash.services.woocommerce.WooCommerce
-  dash.metrics.service.reporters: [csv,console]
-  dash.metrics.service.elasticsearch.hosts: ['localhost:9200']
-  woocommerce.host: 172.16.228.138
-  woocommerce.port: 8080
-  # an example of how to make it work with name based virtual hosts and dnsmasq
-  # woocommerce.host: 't%d.dev'
-  # woocommerce.scheme.namebased: true
-  woocommerce.pages: 3
-
-WOOCOM_VPS:
-  <<: *woocom_defaults
-  dash.workload.tag: [WOO_FIND, WOO_PNXT, WOO_PLIM]
-  dash.workload.mix: [50,49,1]
-  woocommerce.tenants: 1
-
-WOOCOM_MTS:
-  <<: *woocom_defaults
-  dash.workload.tag: [WOO_FIND, WOO_PNXT]
-  dash.workload.mix: [50,50]
-  woocommerce.tenants: 1
-
-MYSQL_INSERT:
-  <<: *defaults
-  <<: *mysql
-  dash.db.name: demo
-  dash.db.schema: demo
-  dash.driver.class: com.github.rbuck.dash.services.insert.InsertBench
-  dash.workload.tag: [INSERT]
-  dash.workload.mix: [100]
-  dash.driver.record.limit: 100000000
-
 ORACLE: &oracle
   dash.db.host: 168.62.53.159
   dash.db.port: 1521
@@ -98,13 +39,53 @@ ORACLE: &oracle
 
 # https://yaml.org/spec/1.2/spec.html
 # https://yaml.org/type/merge.html
-ORACLE_PING:
-  <<: *oracle
+
+NUODB_PING:
+  <<: *nuodb
   <<: *defaults
   dash.db.transaction.autocommit: false
-  dash.driver.class: com.github.rbuck.dash.services.ping.PingService
+  dash.driver.class: com.github.rbuck.dash.services.ping.GenericSql
   dash.db.name: demodb
   dash.db.user: AAP_OWNER
   dash.db.password: secret
   dash.workload.tag: [PING]
   dash.workload.mix: [100]
+
+ORACLE_QUERY: &oq_common
+  <<: *oracle
+  <<: *defaults
+  dash.db.transaction.autocommit: false
+  dash.driver.class: com.github.rbuck.dash.services.generic.GenericSql
+  dash.db.name: demodb
+  dash.db.user: AAP_OWNER
+  dash.db.password: secret
+  dash.workload.mix: [100]
+
+ORCL_PING:
+  <<: *oq_common
+  dash.driver.class: com.github.rbuck.dash.services.ping.PingService
+  dash.workload.tag: [PING]
+
+ORCL_Q1:
+  <<: *oq_common
+  dash.workload.tag: [QUERY3]
+
+ORCL_Q2:
+  <<: *oq_common
+  dash.workload.tag: [QUERY2]
+
+ORCL_Q3:
+  <<: *oq_common
+  dash.workload.tag: [QUERY3]
+
+ORCL_Q4:
+  <<: *oq_common
+  dash.workload.tag: [QUERY4]
+
+ORCL_Q5:
+  <<: *oq_common
+  dash.workload.tag: [QUERY5]
+
+ORCL_Q6:
+  <<: *oq_common
+  dash.workload.tag: [QUERY6]

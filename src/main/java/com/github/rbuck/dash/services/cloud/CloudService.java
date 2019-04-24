@@ -52,7 +52,7 @@ public class CloudService extends AbstractService {
     }
 
     private void createAccount(CloudContext context, Connection connection) throws SQLException {
-        try (PreparedStatement putUser = connection.prepareStatement(dialect.getSqlStatement("PUT_ACCOUNT"))) {
+        try (PreparedStatement putUser = connection.prepareStatement(dialect.getProperty("PUT_ACCOUNT"))) {
             putUser.setString(1, getNextUrn(context)); // unique
             putUser.setString(2, SyntheticData.genRandString(20)); // name
             putUser.setString(3, SyntheticData.genRandString(35)); // description
@@ -64,7 +64,7 @@ public class CloudService extends AbstractService {
         long time = System.currentTimeMillis();
         String urn = getRandUrn(context);
         if (urn != null) {
-            try (PreparedStatement countsPs = connection.prepareStatement(dialect.getSqlStatement("GET_CONTAINER_COUNTS"))) {
+            try (PreparedStatement countsPs = connection.prepareStatement(dialect.getProperty("GET_CONTAINER_COUNTS"))) {
                 countsPs.setString(1, urn);
                 try (ResultSet rs = countsPs.executeQuery()) {
                     if (rs.next()) {
@@ -72,7 +72,7 @@ public class CloudService extends AbstractService {
                         long permitted = rs.getLong(2);
                         long currently = rs.getLong(3);
                         if (currently < permitted) {
-                            try (PreparedStatement insertPs = connection.prepareStatement(dialect.getSqlStatement("PUT_CONTAINER"))) {
+                            try (PreparedStatement insertPs = connection.prepareStatement(dialect.getProperty("PUT_CONTAINER"))) {
                                 insertPs.setLong(1, accountId);
                                 insertPs.setString(2, genRandContainer(urn));
                                 insertPs.setTimestamp(3, new Timestamp(time));
@@ -89,7 +89,7 @@ public class CloudService extends AbstractService {
         long time = System.currentTimeMillis();
         String urn = getRandUrn(context);
         if (urn != null) {
-            try (PreparedStatement countsPs = connection.prepareStatement(dialect.getSqlStatement("GET_CONTAINER_COUNTS"))) {
+            try (PreparedStatement countsPs = connection.prepareStatement(dialect.getProperty("GET_CONTAINER_COUNTS"))) {
                 countsPs.setString(1, urn);
                 try (ResultSet rsContainerCounts = countsPs.executeQuery()) {
                     if (rsContainerCounts.next()) {
@@ -97,12 +97,12 @@ public class CloudService extends AbstractService {
                         long permitted = rsContainerCounts.getLong(2);
                         long currently = rsContainerCounts.getLong(3);
                         if (currently > 0) {
-                            try (PreparedStatement getContainerIdPs = connection.prepareStatement(dialect.getSqlStatement("GET_RAND_CONTAINER"))) {
+                            try (PreparedStatement getContainerIdPs = connection.prepareStatement(dialect.getProperty("GET_RAND_CONTAINER"))) {
                                 getContainerIdPs.setLong(1, accountId);
                                 try (ResultSet rsCid = getContainerIdPs.executeQuery()) {
                                     if (rsCid.next()) {
                                         long cId = rsContainerCounts.getLong(1);
-                                        try (PreparedStatement insertPs = connection.prepareStatement(dialect.getSqlStatement("PUT_OBJECT"))) {
+                                        try (PreparedStatement insertPs = connection.prepareStatement(dialect.getProperty("PUT_OBJECT"))) {
                                             insertPs.setLong(1, cId);
                                             insertPs.setString(2, SyntheticData.genRandUuid());
                                             insertPs.setTimestamp(3, new Timestamp(time));
@@ -122,7 +122,7 @@ public class CloudService extends AbstractService {
     }
 
     private void calculateMeanObjectSize(Context context, Connection connection) throws SQLException {
-        try (PreparedStatement sizePs = connection.prepareStatement(dialect.getSqlStatement("GET_OBJECT_SIZE"))) {
+        try (PreparedStatement sizePs = connection.prepareStatement(dialect.getProperty("GET_OBJECT_SIZE"))) {
             try (ResultSet sizeRs = sizePs.executeQuery()) {
                 sizeRs.setFetchSize(1000);
                 int size = 0;
@@ -139,12 +139,12 @@ public class CloudService extends AbstractService {
     private void listContainers(CloudContext context, Connection connection) throws SQLException {
         String urn = getRandUrn(context);
         if (urn != null) {
-            try (PreparedStatement userIdPs = connection.prepareStatement(dialect.getSqlStatement("GET_ACCOUNT_ID"))) {
+            try (PreparedStatement userIdPs = connection.prepareStatement(dialect.getProperty("GET_ACCOUNT_ID"))) {
                 userIdPs.setString(1, urn);
                 try (ResultSet userIdResult = userIdPs.executeQuery()) {
                     if (userIdResult.next()) {
                         long accountId = userIdResult.getLong(1);
-                        try (PreparedStatement statement = connection.prepareStatement(dialect.getSqlStatement("GET_CONTAINER_LIST"))) {
+                        try (PreparedStatement statement = connection.prepareStatement(dialect.getProperty("GET_CONTAINER_LIST"))) {
                             statement.setLong(1, accountId);
                             try (ResultSet rs = statement.executeQuery()) {
                                 while (rs.next()) {
@@ -167,17 +167,17 @@ public class CloudService extends AbstractService {
     private void listObjects(CloudContext context, Connection connection) throws SQLException {
         String urn = getRandUrn(context);
         if (urn != null) {
-            try (PreparedStatement userIdPs = connection.prepareStatement(dialect.getSqlStatement("GET_ACCOUNT_ID"))) {
+            try (PreparedStatement userIdPs = connection.prepareStatement(dialect.getProperty("GET_ACCOUNT_ID"))) {
                 userIdPs.setString(1, urn);
                 try (ResultSet userIdResult = userIdPs.executeQuery()) {
                     if (userIdResult.next()) {
                         long accountId = userIdResult.getLong(1);
-                        try (PreparedStatement getContainerIdPs = connection.prepareStatement(dialect.getSqlStatement("GET_RAND_CONTAINER"))) {
+                        try (PreparedStatement getContainerIdPs = connection.prepareStatement(dialect.getProperty("GET_RAND_CONTAINER"))) {
                             getContainerIdPs.setLong(1, accountId);
                             try (ResultSet rsCid = getContainerIdPs.executeQuery()) {
                                 if (rsCid.next()) {
                                     long cId = rsCid.getLong(1);
-                                    try (PreparedStatement statement = connection.prepareStatement(dialect.getSqlStatement("GET_OBJECT_LIST"))) {
+                                    try (PreparedStatement statement = connection.prepareStatement(dialect.getProperty("GET_OBJECT_LIST"))) {
                                         statement.setLong(1, cId);
                                         try (ResultSet rs = statement.executeQuery()) {
                                             while (rs.next()) {

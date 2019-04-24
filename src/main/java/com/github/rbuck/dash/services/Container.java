@@ -185,6 +185,7 @@ public class Container {
         }
         ServiceLoader<Service> serviceLoader = ServiceLoader.load(Service.class);
         for (Service service : serviceLoader) {
+            System.out.println(service.getClass().getName());
             if (Service.class.isAssignableFrom(service.getClass())) {
                 services.add(service);
             }

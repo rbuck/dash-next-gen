@@ -17,7 +17,7 @@ import static java.lang.System.getProperties;
  */
 public abstract class AbstractService implements Service {
 
-    protected static final String WORKER_THREADS = "dash.driver.threads";
+    private static final String WORKER_THREADS = "dash.driver.threads";
 
     enum Status {
         CREATED,
@@ -103,7 +103,7 @@ public abstract class AbstractService implements Service {
         }
     }
 
-    void panic(Error e) {
+    private void panic(Error e) {
         stop();
         throw e;
     }
@@ -164,21 +164,21 @@ public abstract class AbstractService implements Service {
      *
      * @return the constructed rate limiter
      */
-    protected Limiter createLimiter() {
+    private Limiter createLimiter() {
         return new ConstantLimiter();
     }
 
-    protected int getTokenCount(Context context, Limiter limiter) {
+    private int getTokenCount(Context context, Limiter limiter) {
         return 1; // constant-rate
     }
 
     // U T I L I T Y   M E T H O D S
 
-    protected String now() {
+    private String now() {
         return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(new java.util.Date());
     }
 
-    protected boolean isExecutable() {
+    private boolean isExecutable() {
         return status.get().ordinal() < Status.STOPPED.ordinal();
     }
 }

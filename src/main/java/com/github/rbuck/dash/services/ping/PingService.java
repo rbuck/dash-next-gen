@@ -86,7 +86,7 @@ public class PingService extends AbstractService {
     }
 
     private void pingServer(PingContext ignore, Connection connection) throws SQLException {
-        try (PreparedStatement query = connection.prepareStatement(dialect.getSqlStatement("PING"))) {
+        try (PreparedStatement query = connection.prepareStatement(dialect.getProperty("PING"))) {
             try (ResultSet pingResult = query.executeQuery()) {
                 if (pingResult.next()) {
                     pingResult.getLong(1);

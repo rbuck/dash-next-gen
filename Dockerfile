@@ -1,22 +1,12 @@
-FROM maven:3.6.0-jdk-8-alpine AS build
+FROM openjdk:8-alpine AS staging
 
 ARG VERSION
-ARG JDBC_VERSION
 
-COPY README.md /tmp/
-COPY LICENSE /tmp/
-COPY versions-maven-plugin-rules.xml /tmp/
-COPY pom.xml /tmp/
-COPY src /tmp/src/
-COPY repo /tmp/repo/
-WORKDIR /tmp/
+COPY build/distributions/dash-${VERSION}.tar.gz /tmp
+WORKDIR /tmp
+
 RUN set -eux && \
-    mvn versions:set -DnewVersion=${VERSION} && \
-    mvn package && \
-    tar xzf target/dash-${VERSION}-distribution.tar.gz
-
-#RUN set -eux && \
-#    mvn versions:display-dependency-updates -Dversions.outputFile=target/outdated.txt
+    tar xzf /tmp/dash-${VERSION}.tar.gz
 
 FROM openjdk:8-alpine AS release
 
@@ -39,7 +29,7 @@ RUN set -eux && \
     apk add --no-cache bash curl && \
     mkdir -p /app
 
-COPY --from=build /tmp/dash-ng-${VERSION}/ /app/
+COPY --from=staging /tmp/dash-${VERSION}/ /app/
 
 ENTRYPOINT [ "docker-entrypoint.sh" ]
 
