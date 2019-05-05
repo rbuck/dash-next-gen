@@ -1,12 +1,12 @@
 # Dash (NG)
 
-## Autobahn TL;DR
+## Dash TL;DR
 
 Use `docker save` and `docker load` to transfer the image to the Oracle host.
 Then run:
 
 ```bash
-$ docker run nuodb/autobahn-dash:latest -t ORCL_Q1
+$ docker run rbuck/dash:latest -t ORCL_Q1
 [2019-04-24T19:08:54.870] created
 [2019-04-24T19:08:58.471] started
 Name        Count       Rate        Min      Max      Mean     Std Dev  Median   75%      95%      98%      99%      99.9%     
